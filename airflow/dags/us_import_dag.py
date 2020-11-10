@@ -28,8 +28,8 @@ start_operator = DummyOperator(task_id='begin_execution',  dag=dag)
 
 s3_bucket_sensor = S3PrefixSensor(
 	task_id='check_s3_bucket_availability',
-	bucket_name=Variable.get('s3_bucket'),
-	prefix='ams/',
+	bucket_name=Variable.get('s3_raw_data_bucket'),
+	prefix=Variable.get('s3_raw_data_folder'),
 	aws_conn_id='S3_bucket_us_import_connection',
 	timeout=300,
 	poke_interval=300,
