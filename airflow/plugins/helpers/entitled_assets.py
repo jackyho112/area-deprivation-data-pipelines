@@ -1,25 +1,27 @@
+import time
+
 # Reference: https://github.com/aws-samples/aws-dataexchange-api-samples#python
 class EntitledAssets():
 	def __init__(self, data_exchange_client):
 		self.data_exchange_client = data_exchange_client
 
 	def get_dataset_info(self, dataset_id):
-		return self.data_exchange_client.get_data_set(dataset_id)
+		return self.data_exchange_client.get_data_set(DataSetId=dataset_id)
 
 	def list_dataset_revisions(self, dataset_id):
-		return self.data_exchange_client.list_data_set_revisions(dataset_id)
+		return self.data_exchange_client.list_data_set_revisions(DataSetId=dataset_id)
 
 	def get_all_dataset_asset_infos(self, dataset_id, revision_id):
 		assets = []
 
 		client = self.data_exchange_client
-		res = client.list_revision_assets(DataSetId=data_set_id, RevisionId=revision_id)
+		res = client.list_revision_assets(DataSetId=dataset_id, RevisionId=revision_id)
 		next_token = res.get('NextToken')
 		
 		assets += res.get('Assets')
 		while next_token:
 			res = client.list_revision_assets(
-				DataSetId=data_set_id,
+				DataSetId=dataset_id,
 				RevisionId=revision_id,
 				NextToken=next_token
 			)
@@ -61,6 +63,6 @@ class EntitledAssets():
 					message=job.get('Errors')[0].get('Message'))
 				)
 
-			time.sleep(60)
+			time.sleep(30)
 
 		return True

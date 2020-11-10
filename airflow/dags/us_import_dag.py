@@ -3,6 +3,7 @@ from airflow.operators.dummy_operator import DummyOperator
 from airflow.sensors import S3PrefixSensor
 from airflow.models import Variable
 from datetime import datetime, timedelta
+from airflow.operators import LoadRawToS3Operator
 
 default_args = {
     'owner': 'jackyho',
@@ -36,4 +37,15 @@ s3_bucket_sensor = S3PrefixSensor(
 	dag=dag
 )
 
+load_raw_data_to_s3_bucket_operator = LoadRawToS3Operator(
+	task_id='load_dataset_to_s3_bucket',
+	dataset_id=Variable.get('data_exchange_dataset_id'),
+	bucket_name=Variable.get('s3_raw_data_bucket'),
+	region_name=Variable.get('data_exchange_dataset_regionn'),
+	timeout=600,
+	poke_interval=300,
+	dag=dag
+)
+
 start_operator >> s3_bucket_sensor
+s3_bucket_sensor >> load_raw_data_to_s3_bucket_operator
