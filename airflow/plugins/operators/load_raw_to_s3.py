@@ -1,7 +1,6 @@
 from airflow.models import BaseOperator, Variable
 from airflow.utils.decorators import apply_defaults
 from airflow.contrib.hooks.aws_hook import AwsHook
-from airflow.models import Variable
 from helpers import EntitledAssets
 
 class LoadRawToS3Operator(BaseOperator):
