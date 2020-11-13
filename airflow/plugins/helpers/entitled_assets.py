@@ -30,7 +30,7 @@ class EntitledAssets():
 			
 		return assets
 
-	def export_assets(self, assets, bucket):
+	def export_assets(self, assets, bucket, folder='input/'):
 		asset_destinations = []
 		client = self.data_exchange_client
 
@@ -38,7 +38,7 @@ class EntitledAssets():
 			asset_destinations.append({
 				"AssetId": asset.get('Id'),
 				"Bucket": bucket,
-				"Key": asset.get('Name')
+				"Key": folder + asset.get('Name')
 			})
 
 		job = client.create_job(Type='EXPORT_ASSETS_TO_S3', Details={

@@ -1,7 +1,7 @@
-from airflow.models import BaseOperator, Variable
+from airflow.models import BaseOperator
 from airflow.utils.decorators import apply_defaults
-from airflow.contrib.hooks.S3_hook import S3Hook
-from helpers import EntitledAssets
+from airflow.hooks.S3_hook import S3Hook
+import os
 
 class LoadScriptsToS3Operator(BaseOperator):
 	ui_color = '#80BD9E'
@@ -10,22 +10,24 @@ class LoadScriptsToS3Operator(BaseOperator):
 	def __init__(
 		self,
 		bucket_name,
-		script_paths,
+		folder_key='scripts/',
 		*args, 
 		**kwargs
 	):
-		super(LoadRawToS3Operator, self).__init__(*args, **kwargs)
+		super(LoadScriptsToS3Operator, self).__init__(*args, **kwargs)
 		self.bucket_name = bucket_name
-		self.script_paths = script_paths
 		self.folder_key = folder_key
 
 	def execute(self, context):
 		s3 = S3Hook()
 
-		for path in self.script_paths:
+		os.chdir(os.path.dirname(os.path.abspath(__file__)))
+		available_scripts = [f.path for f in os.scandir('../scripts') if '.py' in f.name]
+
+		for script in available_scripts:
 			s3.load_file(
-				filename='../scripts/' + path,
+				filename=script,
 				bucket_name=self.bucket_name,
 				replace=True,
-				key='scripts/' + path.split('/')[-1]
+				key=self.folder_key + script.split('/')[-1]
 			)

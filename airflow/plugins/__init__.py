@@ -8,5 +8,6 @@ class USImportPlugin(AirflowPlugin):
     name = "us_import_plugin"
 
     operators = [
-    	operators.LoadRawToS3Operator
+		operators.LoadInputToS3Operator,
+		operators.LoadScriptsToS3Operator
     ]

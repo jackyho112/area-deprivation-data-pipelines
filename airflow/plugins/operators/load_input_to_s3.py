@@ -1,9 +1,9 @@
-from airflow.models import BaseOperator, Variable
+from airflow.models import BaseOperator
 from airflow.utils.decorators import apply_defaults
 from airflow.contrib.hooks.aws_hook import AwsHook
 from helpers import EntitledAssets
 
-class LoadRawToS3Operator(BaseOperator):
+class LoadInputToS3Operator(BaseOperator):
 	ui_color = '#80BD9E'
 
 	@apply_defaults
@@ -15,7 +15,7 @@ class LoadRawToS3Operator(BaseOperator):
 		*args, 
 		**kwargs
 	):
-		super(LoadRawToS3Operator, self).__init__(*args, **kwargs)
+		super(LoadInputToS3Operator, self).__init__(*args, **kwargs)
 		self.dataset_id = dataset_id
 		self.bucket_name = bucket_name
 		self.region_name = region_name

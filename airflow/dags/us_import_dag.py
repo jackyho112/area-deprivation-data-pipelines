@@ -1,9 +1,10 @@
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
+from airflow.hooks import S3_hook
 from airflow.sensors import S3PrefixSensor
 from airflow.models import Variable
 from datetime import datetime, timedelta
-from airflow.operators import LoadRawToS3Operator
+from airflow.operators import LoadInputToS3Operator, LoadScriptsToS3Operator
 
 default_args = {
     'owner': 'jackyho',
@@ -37,8 +38,8 @@ s3_bucket_sensor = S3PrefixSensor(
 	dag=dag
 )
 
-load_raw_data_to_s3_bucket_operator = LoadRawToS3Operator(
-	task_id='load_dataset_to_s3_bucket',
+load_input_to_s3_bucket_operator = LoadInputToS3Operator(
+	task_id='load_input_to_s3_bucket',
 	dataset_id=Variable.get('data_exchange_dataset_id'),
 	bucket_name=Variable.get('s3_raw_data_bucket'),
 	region_name=Variable.get('data_exchange_dataset_regionn'),
@@ -47,5 +48,13 @@ load_raw_data_to_s3_bucket_operator = LoadRawToS3Operator(
 	dag=dag
 )
 
+load_scripts_to_s3_bucket_operator = LoadScriptsToS3Operator(
+	task_id='load_scripts_to_s3_bucket',
+	bucket_name=Variable.get('s3_raw_data_bucket'),
+	timeout=600,
+	poke_interval=300,
+	dag=dag
+)
+
 start_operator >> s3_bucket_sensor
-s3_bucket_sensor >> load_raw_data_to_s3_bucket_operator
+s3_bucket_sensor >> [load_input_to_s3_bucket_operator, load_scripts_to_s3_bucket_operator]
