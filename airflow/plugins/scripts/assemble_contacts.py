@@ -34,7 +34,7 @@ def create_spark_session():
     return spark
 
 def get_file_path(year, revision, name):
-	return f"../data/ams/{year}/{revision}/ams__{name}_{year}__{revision}.csv"
+	return f"../input/ams/{year}/{revision}/ams__{name}_{year}__{revision}.csv"
 
 def get_contact_dataframe(spark, year, revision, name):
 	df = spark.read \
@@ -58,24 +58,17 @@ def process_contact_data(spark, year, revision):
 	contact_df.repartition(1).write.mode('overwrite').format("csv") \
 	    .option("header", True) \
 	    .option("escape", '"') \
-	    .save("../data/contact")
+	    .save(f"../output/contact/{year}")
 
-def main(year, revision):
+def main(years):
     spark = create_spark_session()
 
-    process_contact_data(spark, year, revision)
+    for year in years:
+        available_revisions = [f.name for f in os.scandir(f"../input/ams/{year}") if f.is_dir()]
+        available_revisions.sort(reverse=True)
+
+        process_contact_data(spark, year, available_revisions[0])
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="""
-    	This script is going to assemble contacts out of export data for a certain year
-    """)
-
-    parser.add_argument("-y", "--year", help="year of exports")
-    args = parser.parse_args()
-    year = args.year or '2020'
-
-    available_revisions = [f.name for f in os.scandir('../data/ams/' + year) if f.is_dir()]
-    available_revisions.sort(reverse=True)
-
-    main(year, available_revisions[0])
-
+    available_years = [f.name for f in os.scandir('../input/ams/') if f.is_dir()]
+    main(available_years)
