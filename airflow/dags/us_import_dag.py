@@ -60,31 +60,43 @@ aws_emr_job_flow_overrides = {
 }
 
 SPARK_STEPS = [ # Note the params values are supplied to the operator
-    {
-        "Name": "Move raw data from S3 to HDFS",
-        "ActionOnFailure": "CANCEL_AND_WAIT",
-        "HadoopJarStep": {
-            "Jar": "command-runner.jar",
-            "Args": [
-                "s3-dist-cp",
-                "--src=s3://{{ params.BUCKET_NAME }}/input",
-                "--dest=/input",
-            ],
-        },
-    },
-    {
-        "Name": "Classify movie reviews",
-        "ActionOnFailure": "CANCEL_AND_WAIT",
-        "HadoopJarStep": {
-            "Jar": "command-runner.jar",
-            "Args": [
-                "spark-submit",
-                "--deploy-mode",
-                "client",
-                "s3://{{ params.BUCKET_NAME }}/scripts/{{ params.s3_script }}",
-            ],
-        },
-    },
+    # {
+    #     "Name": "Move raw data from S3 to HDFS",
+    #     "ActionOnFailure": "CANCEL_AND_WAIT",
+    #     "HadoopJarStep": {
+    #         "Jar": "command-runner.jar",
+    #         "Args": [
+    #             "s3-dist-cp",
+    #             "--src=s3://{{ params.bucket }}/input",
+    #             "--dest=hdfs:///",
+    #         ],
+    #     },
+    # },
+    # {
+    #     "Name": "Move scripts from S3 to HDFS",
+    #     "ActionOnFailure": "CANCEL_AND_WAIT",
+    #     "HadoopJarStep": {
+    #         "Jar": "command-runner.jar",
+    #         "Args": [
+    #             "s3-dist-cp",
+    #             "--src=s3://{{ params.bucket }}/scripts",
+    #             "--dest=/scripts",
+    #         ],
+    #     },
+    # },
+    # {
+    #     "Name": "Process data",
+    #     "ActionOnFailure": "CANCEL_AND_WAIT",
+    #     "HadoopJarStep": {
+    #         "Jar": "command-runner.jar",
+    #         "Args": [
+    #             "spark-submit",
+    #             "--deploy-mode",
+    #             "client",
+    #             "s3://{{ params.bucket }}/scripts/{{ params.s3_script }}",
+    #         ],
+    #     },
+    # },
     {
         "Name": "Move clean data from HDFS to S3",
         "ActionOnFailure": "CANCEL_AND_WAIT",
@@ -92,8 +104,8 @@ SPARK_STEPS = [ # Note the params values are supplied to the operator
             "Jar": "command-runner.jar",
             "Args": [
                 "s3-dist-cp",
-                "--src=/output",
-                "--dest=s3://{{ params.BUCKET_NAME }}/ouput",
+                "--src=/home",
+                "--dest=s3://{{ params.bucket }}/output",
             ],
         },
     }
@@ -146,6 +158,18 @@ create_emr_cluster = EmrCreateJobFlowOperator(
     dag=dag
 )
 
+add_emr_steps = EmrAddStepsOperator(
+    task_id="add_emr_steps",
+    job_flow_id="{{ task_instance.xcom_pull(task_ids='create_emr_cluster', key='return_value') }}", 
+    aws_conn_id="aws_default",
+    steps=SPARK_STEPS,
+    params={
+        "bucket": Variable.get('s3_raw_data_bucket'),
+        "s3_script": 'assemble_contacts.py'
+    },
+    dag=dag
+)
+
 terminate_emr_cluster = EmrTerminateJobFlowOperator(
     task_id="terminate_emr_cluster",
     job_flow_id="{{ task_instance.xcom_pull(task_ids='create_emr_cluster', key='return_value') }}",
@@ -163,6 +187,6 @@ s3_bucket_sensor >> [
 	load_input_to_s3_bucket_operator, 
 	load_scripts_to_s3_bucket_operator,
 	create_emr_cluster
-] >> terminate_emr_cluster
+] >> add_emr_steps
 
 

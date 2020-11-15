@@ -25,7 +25,6 @@ contact_schema = StructType([
 ])
 
 contacts = ['consignee', 'notifyparty', 'shipper']
-file_dir = os.path.dirname(os.path.abspath(__file__))
 
 def create_spark_session():
     spark = SparkSession \
@@ -34,24 +33,21 @@ def create_spark_session():
 
     return spark
 
-def get_file_path(year, revision, name):
-	return f"{file_dir}/input/ams/{year}/{revision}/ams__{name}_{year}__{revision}.csv"
-
-def get_contact_dataframe(spark, year, revision, name):
+def get_contact_dataframe(spark, name):
 	df = spark.read \
 		.option("header", True) \
 	    .option("escape", '"') \
 	    .csv(
-	    	get_file_path(year, revision, name),
+	    	f"./input/ams/*/*/ams__{name}_*__*.csv",
 	        schema=contact_schema,
 	        enforceSchema=True
 	    )
 
 	return df.withColumn('contact_type', lit(name))
 
-def process_contact_data(spark, year, revision):
+def process_contact_data(spark):
 	contact_dfs = list(map(
-		lambda name: get_contact_dataframe(spark, year, revision, name), 
+		lambda name: get_contact_dataframe(spark, name), 
 		contacts
 	))
 	contact_df = functools.reduce(lambda a,b: a.union(b), contact_dfs)
@@ -59,18 +55,12 @@ def process_contact_data(spark, year, revision):
 	contact_df.repartition(1).write.mode('overwrite').format("csv") \
 	    .option("header", True) \
 	    .option("escape", '"') \
-	    .save(f"{file_dir}/output/contact/{year}")
+	    .save(f"./output/contact/")
 
-def main(years):
+def main():
     spark = create_spark_session()
-
-    for year in years:
-        available_revisions = [f.name for f in os.scandir(f"{file_dir}/input/ams/{year}") if f.is_dir()]
-        available_revisions.sort(reverse=True)
-
-        process_contact_data(spark, year, available_revisions[0])
+    process_contact_data(spark)
 
 if __name__ == "__main__":
-    available_years = [f.name for f in os.scandir(f"{file_dir}/input/ams/") if f.is_dir()]
-    main(available_years)
+    main()
 
