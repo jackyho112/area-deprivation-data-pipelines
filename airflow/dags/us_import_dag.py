@@ -60,43 +60,31 @@ aws_emr_job_flow_overrides = {
 }
 
 SPARK_STEPS = [ # Note the params values are supplied to the operator
-    # {
-    #     "Name": "Move raw data from S3 to HDFS",
-    #     "ActionOnFailure": "CANCEL_AND_WAIT",
-    #     "HadoopJarStep": {
-    #         "Jar": "command-runner.jar",
-    #         "Args": [
-    #             "s3-dist-cp",
-    #             "--src=s3://{{ params.bucket }}/input",
-    #             "--dest=hdfs:///",
-    #         ],
-    #     },
-    # },
-    # {
-    #     "Name": "Move scripts from S3 to HDFS",
-    #     "ActionOnFailure": "CANCEL_AND_WAIT",
-    #     "HadoopJarStep": {
-    #         "Jar": "command-runner.jar",
-    #         "Args": [
-    #             "s3-dist-cp",
-    #             "--src=s3://{{ params.bucket }}/scripts",
-    #             "--dest=/scripts",
-    #         ],
-    #     },
-    # },
-    # {
-    #     "Name": "Process data",
-    #     "ActionOnFailure": "CANCEL_AND_WAIT",
-    #     "HadoopJarStep": {
-    #         "Jar": "command-runner.jar",
-    #         "Args": [
-    #             "spark-submit",
-    #             "--deploy-mode",
-    #             "client",
-    #             "s3://{{ params.bucket }}/scripts/{{ params.s3_script }}",
-    #         ],
-    #     },
-    # },
+    {
+        "Name": "Move raw data from S3 to HDFS",
+        "ActionOnFailure": "CANCEL_AND_WAIT",
+        "HadoopJarStep": {
+            "Jar": "command-runner.jar",
+            "Args": [
+                "s3-dist-cp",
+                "--src=s3://{{ params.bucket }}/input",
+                "--dest=hdfs:///input",
+            ],
+        },
+    },
+    {
+        "Name": "Process data",
+        "ActionOnFailure": "CANCEL_AND_WAIT",
+        "HadoopJarStep": {
+            "Jar": "command-runner.jar",
+            "Args": [
+                "spark-submit",
+                "--deploy-mode",
+                "client",
+                "s3://{{ params.bucket }}/scripts/{{ params.s3_script }}",
+            ],
+        },
+    },
     {
         "Name": "Move clean data from HDFS to S3",
         "ActionOnFailure": "CANCEL_AND_WAIT",
@@ -104,7 +92,7 @@ SPARK_STEPS = [ # Note the params values are supplied to the operator
             "Jar": "command-runner.jar",
             "Args": [
                 "s3-dist-cp",
-                "--src=/home",
+                "--src=hdfs:///ouput",
                 "--dest=s3://{{ params.bucket }}/output",
             ],
         },

@@ -55,7 +55,7 @@ def process_contact_data(spark):
 	contact_df.repartition(1).write.mode('overwrite').format("csv") \
 	    .option("header", True) \
 	    .option("escape", '"') \
-	    .save(f"./output/contact/")
+	    .save("./output/contact/")
 
 def main():
     spark = create_spark_session()
