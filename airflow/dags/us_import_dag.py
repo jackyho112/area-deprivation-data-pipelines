@@ -5,6 +5,9 @@ from airflow.sensors import S3PrefixSensor
 from airflow.models import Variable
 from datetime import datetime, timedelta
 from airflow.operators import LoadInputToS3Operator, LoadScriptsToS3Operator
+from airflow.contrib.operators.emr_create_job_flow_operator import EmrCreateJobFlowOperator
+from airflow.contrib.operators.emr_terminate_job_flow_operator import EmrTerminateJobFlowOperator
+from airflow.contrib.operators.emr_add_steps_operator import EmrAddStepsOperator
 
 default_args = {
     'owner': 'jackyho',
@@ -16,6 +19,85 @@ default_args = {
     'email_on_retry': False,
     'email_on_failure': False
 }
+
+aws_emr_job_flow_overrides = {
+    "Name": "US Import ETL",
+    "ReleaseLabel": "emr-6.1.0",
+    "Applications": [{"Name": "Hadoop"}, {"Name": "Spark"}], # We want our EMR cluster to have HDFS and Spark
+    "Configurations": [
+        {
+            "Classification": "spark-env",
+            "Configurations": [
+                {
+                    "Classification": "export",
+                    "Properties": {"PYSPARK_PYTHON": "/usr/bin/python3"}, # by default EMR uses py2, change it to py3
+                }
+            ],
+        }
+    ],
+    "Instances": {
+        "InstanceGroups": [
+            {
+                "Name": "Master node",
+                "Market": "SPOT",
+                "InstanceRole": "MASTER",
+                "InstanceType": "m4.xlarge",
+                "InstanceCount": 1,
+            },
+            {
+                "Name": "Core - 2",
+                "Market": "SPOT", # Spot instances are a "use as available" instances
+                "InstanceRole": "CORE",
+                "InstanceType": "m4.xlarge",
+                "InstanceCount": 2,
+            },
+        ],
+        "KeepJobFlowAliveWhenNoSteps": True,
+        "TerminationProtected": False, # this lets us programmatically terminate the cluster
+    },
+    "JobFlowRole": "EMR_EC2_DefaultRole",
+    "ServiceRole": "EMR_DefaultRole"
+}
+
+SPARK_STEPS = [ # Note the params values are supplied to the operator
+    {
+        "Name": "Move raw data from S3 to HDFS",
+        "ActionOnFailure": "CANCEL_AND_WAIT",
+        "HadoopJarStep": {
+            "Jar": "command-runner.jar",
+            "Args": [
+                "s3-dist-cp",
+                "--src=s3://{{ params.BUCKET_NAME }}/input",
+                "--dest=/input",
+            ],
+        },
+    },
+    {
+        "Name": "Classify movie reviews",
+        "ActionOnFailure": "CANCEL_AND_WAIT",
+        "HadoopJarStep": {
+            "Jar": "command-runner.jar",
+            "Args": [
+                "spark-submit",
+                "--deploy-mode",
+                "client",
+                "s3://{{ params.BUCKET_NAME }}/scripts/{{ params.s3_script }}",
+            ],
+        },
+    },
+    {
+        "Name": "Move clean data from HDFS to S3",
+        "ActionOnFailure": "CANCEL_AND_WAIT",
+        "HadoopJarStep": {
+            "Jar": "command-runner.jar",
+            "Args": [
+                "s3-dist-cp",
+                "--src=/output",
+                "--dest=s3://{{ params.BUCKET_NAME }}/ouput",
+            ],
+        },
+    }
+]
 
 dag_name = 'goodreads_pipeline'
 dag = DAG(
@@ -56,5 +138,31 @@ load_scripts_to_s3_bucket_operator = LoadScriptsToS3Operator(
 	dag=dag
 )
 
+create_emr_cluster = EmrCreateJobFlowOperator(
+    task_id="create_emr_cluster",
+    job_flow_overrides=aws_emr_job_flow_overrides,
+    aws_conn_id="aws_default",
+    emr_conn_id="emr_default",
+    dag=dag
+)
+
+terminate_emr_cluster = EmrTerminateJobFlowOperator(
+    task_id="terminate_emr_cluster",
+    job_flow_id="{{ task_instance.xcom_pull(task_ids='create_emr_cluster', key='return_value') }}",
+    aws_conn_id="aws_default",
+    dag=dag
+)
+
 start_operator >> s3_bucket_sensor
-s3_bucket_sensor >> [load_input_to_s3_bucket_operator, load_scripts_to_s3_bucket_operator]
+s3_bucket_sensor >> [
+	load_input_to_s3_bucket_operator, 
+	load_scripts_to_s3_bucket_operator,
+	create_emr_cluster
+]
+[
+	load_input_to_s3_bucket_operator, 
+	load_scripts_to_s3_bucket_operator,
+	create_emr_cluster
+] >> terminate_emr_cluster
+
+
