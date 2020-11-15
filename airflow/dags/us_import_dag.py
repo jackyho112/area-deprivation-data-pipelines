@@ -92,7 +92,7 @@ SPARK_STEPS = [ # Note the params values are supplied to the operator
             "Jar": "command-runner.jar",
             "Args": [
                 "s3-dist-cp",
-                "--src=hdfs:///ouput",
+                "--src=hdfs:///output",
                 "--dest=s3://{{ params.bucket }}/output",
             ],
         },

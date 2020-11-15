@@ -38,7 +38,7 @@ def get_contact_dataframe(spark, name):
 		.option("header", True) \
 	    .option("escape", '"') \
 	    .csv(
-	    	f"./input/ams/*/*/ams__{name}_*__*.csv",
+	    	f"/input/ams/*/*/ams__{name}_*__*.csv",
 	        schema=contact_schema,
 	        enforceSchema=True
 	    )
@@ -55,12 +55,17 @@ def process_contact_data(spark):
 	contact_df.repartition(1).write.mode('overwrite').format("csv") \
 	    .option("header", True) \
 	    .option("escape", '"') \
-	    .save("./output/contact/")
+	    .save("/output/contact/")
 
 def main():
     spark = create_spark_session()
     process_contact_data(spark)
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-l', '--local', action='store_true')
+    args = parser.parse_args()
+    print(args.local)
+
+    # main()
 
