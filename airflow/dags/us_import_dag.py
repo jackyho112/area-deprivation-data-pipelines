@@ -4,10 +4,12 @@ from airflow.hooks import S3_hook
 from airflow.sensors import S3PrefixSensor
 from airflow.models import Variable
 from datetime import datetime, timedelta
-from airflow.operators import LoadInputToS3Operator, LoadScriptsToS3Operator
+from airflow.operators import LoadInputToS3Operator, LoadScriptsToS3Operator, ClearS3OutputOperator
 from airflow.contrib.operators.emr_create_job_flow_operator import EmrCreateJobFlowOperator
 from airflow.contrib.operators.emr_terminate_job_flow_operator import EmrTerminateJobFlowOperator
 from airflow.contrib.operators.emr_add_steps_operator import EmrAddStepsOperator
+from airflow.contrib.sensors.emr_step_sensor import EmrStepSensor
+from airflow.contrib.operators.emr_terminate_job_flow_operator import EmrTerminateJobFlowOperator
 
 default_args = {
     'owner': 'jackyho',
@@ -35,6 +37,7 @@ aws_emr_job_flow_overrides = {
             ],
         }
     ],
+    "LogUri": f"s3://{Variable.get('s3_raw_data_bucket')}-logs/",
     "Instances": {
         "InstanceGroups": [
             {
@@ -59,7 +62,7 @@ aws_emr_job_flow_overrides = {
     "ServiceRole": "EMR_DefaultRole"
 }
 
-SPARK_STEPS = [ # Note the params values are supplied to the operator
+spark_steps = [ # Note the params values are supplied to the operator
     {
         "Name": "Move raw data from S3 to HDFS",
         "ActionOnFailure": "CANCEL_AND_WAIT",
@@ -138,6 +141,14 @@ load_scripts_to_s3_bucket_operator = LoadScriptsToS3Operator(
 	dag=dag
 )
 
+clear_s3_output_operator = ClearS3OutputOperator(
+    task_id='clear_s3_output',
+    bucket_name=Variable.get('s3_raw_data_bucket'),
+    timeout=600,
+    poke_interval=300,
+    dag=dag
+)
+
 create_emr_cluster = EmrCreateJobFlowOperator(
     task_id="create_emr_cluster",
     job_flow_overrides=aws_emr_job_flow_overrides,
@@ -150,11 +161,22 @@ add_emr_steps = EmrAddStepsOperator(
     task_id="add_emr_steps",
     job_flow_id="{{ task_instance.xcom_pull(task_ids='create_emr_cluster', key='return_value') }}", 
     aws_conn_id="aws_default",
-    steps=SPARK_STEPS,
+    steps=spark_steps,
     params={
         "bucket": Variable.get('s3_raw_data_bucket'),
         "s3_script": 'assemble_contacts.py'
     },
+    dag=dag
+)
+
+last_emr_step = len(spark_steps) - 1
+step_checker = EmrStepSensor(
+    task_id="watch_last_emr_step",
+    job_flow_id="{{ task_instance.xcom_pull('create_emr_cluster', key='return_value') }}",
+    step_id="{{ task_instance.xcom_pull(task_ids='add_emr_steps', key='return_value')["
+    + str(last_emr_step)
+    + "] }}",
+    aws_conn_id="aws_default",
     dag=dag
 )
 
@@ -169,11 +191,13 @@ start_operator >> s3_bucket_sensor
 s3_bucket_sensor >> [
 	load_input_to_s3_bucket_operator, 
 	load_scripts_to_s3_bucket_operator,
+    clear_s3_output_operator,
 	create_emr_cluster
 ]
 [
 	load_input_to_s3_bucket_operator, 
 	load_scripts_to_s3_bucket_operator,
+    clear_s3_output_operator,
 	create_emr_cluster
 ] >> add_emr_steps
 
