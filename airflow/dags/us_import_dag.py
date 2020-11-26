@@ -1,10 +1,11 @@
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
-from airflow.hooks import S3_hook
-from airflow.sensors import S3PrefixSensor
 from airflow.models import Variable
 from datetime import datetime, timedelta
-from airflow.operators import LoadInputToS3Operator, LoadScriptsToS3Operator, ClearS3OutputOperator
+from airflow.operators import (
+    LoadInputToS3Operator, LoadScriptsToS3Operator, ClearS3OutputOperator,
+    CheckForBucketOperator
+)
 from airflow.contrib.operators.emr_create_job_flow_operator import EmrCreateJobFlowOperator
 from airflow.contrib.operators.emr_terminate_job_flow_operator import EmrTerminateJobFlowOperator
 from airflow.contrib.operators.emr_add_steps_operator import EmrAddStepsOperator
@@ -62,6 +63,11 @@ aws_emr_job_flow_overrides = {
     "ServiceRole": "EMR_DefaultRole"
 }
 
+script_args = ','.join(list(map(
+    lambda x: "s3://{{ params.bucket }}/scripts/" + x,
+    ['assemble_contacts.py']
+)))
+
 spark_steps = [ # Note the params values are supplied to the operator
     {
         "Name": "Move raw data from S3 to HDFS",
@@ -84,7 +90,7 @@ spark_steps = [ # Note the params values are supplied to the operator
                 "spark-submit",
                 "--deploy-mode",
                 "client",
-                "s3://{{ params.bucket }}/scripts/{{ params.s3_script }}",
+                script_args,
             ],
         },
     },
@@ -102,7 +108,6 @@ spark_steps = [ # Note the params values are supplied to the operator
     }
 ]
 
-dag_name = 'goodreads_pipeline'
 dag = DAG(
 	'us_import_dag',
 	default_args=default_args,
@@ -113,13 +118,9 @@ dag = DAG(
 
 start_operator = DummyOperator(task_id='begin_execution',  dag=dag)
 
-s3_bucket_sensor = S3PrefixSensor(
+s3_bucket_sensor = CheckForBucketOperator(
 	task_id='check_s3_bucket_availability',
 	bucket_name=Variable.get('s3_raw_data_bucket'),
-	prefix=Variable.get('s3_raw_data_folder'),
-	aws_conn_id='S3_bucket_us_import_connection',
-	timeout=300,
-	poke_interval=300,
 	dag=dag
 )
 
@@ -162,10 +163,7 @@ add_emr_steps = EmrAddStepsOperator(
     job_flow_id="{{ task_instance.xcom_pull(task_ids='create_emr_cluster', key='return_value') }}", 
     aws_conn_id="aws_default",
     steps=spark_steps,
-    params={
-        "bucket": Variable.get('s3_raw_data_bucket'),
-        "s3_script": 'assemble_contacts.py'
-    },
+    params={"bucket": Variable.get('s3_raw_data_bucket')},
     dag=dag
 )
 

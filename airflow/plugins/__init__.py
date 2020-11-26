@@ -10,5 +10,6 @@ class USImportPlugin(AirflowPlugin):
     operators = [
 		operators.LoadInputToS3Operator,
 		operators.LoadScriptsToS3Operator,
-		operators.ClearS3OutputOperator
+		operators.ClearS3OutputOperator,
+		operators.CheckForBucketOperator
     ]
