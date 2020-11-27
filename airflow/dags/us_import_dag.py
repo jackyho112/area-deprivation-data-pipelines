@@ -63,11 +63,6 @@ aws_emr_job_flow_overrides = {
     "ServiceRole": "EMR_DefaultRole"
 }
 
-script_args = ','.join(list(map(
-    lambda x: "s3://{{ params.bucket }}/scripts/" + x,
-    ['assemble_contacts.py']
-)))
-
 spark_steps = [ # Note the params values are supplied to the operator
     {
         "Name": "Move raw data from S3 to HDFS",
@@ -80,33 +75,37 @@ spark_steps = [ # Note the params values are supplied to the operator
                 "--dest=hdfs:///input",
             ],
         },
-    },
-    {
-        "Name": "Process data",
-        "ActionOnFailure": "CANCEL_AND_WAIT",
-        "HadoopJarStep": {
-            "Jar": "command-runner.jar",
-            "Args": [
-                "spark-submit",
-                "--deploy-mode",
-                "client",
-                script_args,
-            ],
-        },
-    },
-    {
-        "Name": "Move clean data from HDFS to S3",
-        "ActionOnFailure": "CANCEL_AND_WAIT",
-        "HadoopJarStep": {
-            "Jar": "command-runner.jar",
-            "Args": [
-                "s3-dist-cp",
-                "--src=hdfs:///output",
-                "--dest=s3://{{ params.bucket }}/output",
-            ],
-        },
     }
 ]
+
+record_scripts = [('assemble_contacts.py', 'contact'), ('assemble_cargo.py', 'cargo')]
+for (script_file, record_name) in record_scripts:
+    spark_steps.append({
+        "Name": f"Process {record_name} data",
+        "ActionOnFailure": "CANCEL_AND_WAIT",
+        "HadoopJarStep": {
+            "Jar": "command-runner.jar",
+            "Args": [ 
+                'spark-submit',
+                '--deploy-mode',
+                'client',
+                's3://{{ params.bucket }}/scripts/' + script_file
+            ],
+        }
+    })
+
+spark_steps.append({
+    "Name": "Move clean data from HDFS to S3",
+    "ActionOnFailure": "CANCEL_AND_WAIT",
+    "HadoopJarStep": {
+        "Jar": "command-runner.jar",
+        "Args": [
+            "s3-dist-cp",
+            "--src=hdfs:///output",
+            "--dest=s3://{{ params.bucket }}/output",
+        ],
+    },
+})
 
 dag = DAG(
 	'us_import_dag',
@@ -198,5 +197,3 @@ s3_bucket_sensor >> [
     clear_s3_output_operator,
 	create_emr_cluster
 ] >> add_emr_steps
-
-
