@@ -1,47 +1,42 @@
 import argparse
 
 from pyspark.sql import SparkSession
-from pyspark.sql.types import (
-	StructType, StructField, StringType
-)
 
-header_schema = StructType([
-    StructField("identifier", StringType()),
-    StructField("carrier_code", StringType()),
-    StructField("vessel_country_code", StringType()),
-    StructField("vessel_name", StringType()),
-    StructField("port_of_unlading", StringType()),
-    StructField("estimated_arrival_date", DateType()),
-    StructField("foreign_port_of_lading_qualifier", StringType()),
-    StructField("foreign_port_of_lading", StringType()),
-    StructField("manifest_quantity", StringType()),
-    StructField("manifest_unit", StringType()),
-    StructField("weight", StringType()),
-    StructField("weight_unit", StringType()),
-    StructField("record_status_indicator", StringType()),
-    StructField("place_of_receipt", StringType()),
-    StructField("port_of_destination", StringType()),
-    StructField("foreign_port_of_destination_qualifier", StringType()),
-    StructField("foreign_port_of_destination", StringType()),
-    StructField("conveyance_id_qualifier", StringType()),
-    StructField("conveyance_id", StringType()),
-    StructField("mode_of_transportation", StringType()),
-    StructField("actual_arrival_date", StringType())
-])
-header_field_names = header_schema.fieldNames()
+kept_header_cols = [
+    "identifier",
+    "carrier_code",
+    "vessel_country_code",
+    "vessel_name",
+    "port_of_unlading",
+    "estimated_arrival_date",
+    "foreign_port_of_lading_qualifier",
+    "foreign_port_of_lading",
+    "manifest_quantity",
+    "manifest_unit",
+    "weight",
+    "weight_unit",
+    "record_status_indicator",
+    "place_of_receipt",
+    "port_of_destination",
+    "foreign_port_of_destination_qualifier",
+    "foreign_port_of_destination",
+    "conveyance_id_qualifier",
+    "conveyance_id",
+    "mode_of_transportation",
+    "actual_arrival_date",
+]
 
-bill_schema = StructType([
-    StructField("identifier", StringType()),
-    StructField("master_bol_number", StringType()),
-    StructField("house_bol_number", StringType()),
-    StructField("sub_house_bol_number", StringType()),
-    StructField("voyage_number", StringType()),
-    StructField("bill_type_code", StringType()),
-    StructField("manifest_number", StringType()),
-    StructField("trade_update_date", StringType()),
-    StructField("run_date", StringType())
-])
-bill_field_names = bill_schema.fieldNames()
+kept_bill_cols = [
+    "identifier",
+    "master_bol_number",
+    "house_bol_number",
+    "sub_house_bol_number",
+    "voyage_number",
+    "bill_type_code",
+    "manifest_number",
+    "trade_update_date",
+    "run_date"
+]
 
 def create_spark_session():
 	spark = SparkSession \
@@ -54,14 +49,16 @@ def process_header_data(spark, local_run=False):
 	header = spark.read \
 		.option("header", True) \
 		.option("escape", '"') \
+        .option("inferSchema", True) \
 		.csv(f"{'.' if local_run else ''}/input/ams/*/*/ams__header_*__*.csv") \
-		.select(*header_field_names)
+		.select(*kept_header_cols)
 
 	bill = spark.read \
 		.option("header", True) \
 		.option("escape", '"') \
+        .option("inferSchema", True) \
 		.csv(f"{'.' if local_run else ''}/input/ams/*/*/ams__billgen_*__*.csv") \
-		.select(*bill_field_names)
+		.select(*kept_bill_cols)
 
 	header_full = header.join(bill, ['identifier'], how='left')
 

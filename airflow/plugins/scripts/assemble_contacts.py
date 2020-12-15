@@ -22,7 +22,6 @@ contact_schema = StructType([
 	StructField("comm_number_qualifier", StringType()),
 	StructField("comm_number", StringType())
 ])
-
 contacts = ['consignee', 'notifyparty', 'shipper']
 
 def create_spark_session():
@@ -36,11 +35,9 @@ def get_contact_dataframe(spark, name, local_run=False):
 	df = spark.read \
 		.option("header", True) \
 		.option("escape", '"') \
-		.csv(
-			f"{'.' if local_run else ''}/input/ams/*/*/ams__{name}_*__*.csv",
-			schema=contact_schema,
-			enforceSchema=True
-		)
+		.option("enforceSchema", True) \
+		.option("schema", contact_schema) \
+		.csv(f"{'.' if local_run else ''}/input/ams/*/*/ams__{name}_*__*.csv")
 
 	return df.withColumn('contact_type', lit(name))
 

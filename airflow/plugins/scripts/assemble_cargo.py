@@ -5,40 +5,40 @@ from pyspark.sql.types import (
 	StructType, StructField, StringType
 )
 
-cargo_desc_schema = StructType([
-	StructField("identifier", StringType()),
-	StructField("container_number", StringType()),
-	StructField("description_sequence_number", StringType()),
-	StructField("piece_count", StringType()),
-	StructField("description_text", StringType())
-])
+cargo_desc_cols = [
+	"identifier",
+	"container_number",
+	"description_sequence_number",
+	"piece_count",
+	"description_text"
+]
 
-hazmat_schema = StructType([
-	StructField("identifier", StringType()),
-	StructField("container_number", StringType()),
-	StructField("hazmat_sequence_number", StringType()),
-	StructField("hazmat_code", StringType()),
-	StructField("hazmat_class", StringType()),
-	StructField("hazmat_code_qualifier", StringType()),
-	StructField("hazmat_contact", StringType()),
-	StructField("hazmat_page_number", StringType()),
-	StructField("hazmat_flash_point_temperature", StringType()),
-	StructField("hazmat_flash_point_temperature_negative_ind", StringType()),
-	StructField("hazmat_flash_point_temperature_unit", StringType()),
-	StructField("hazmat_description", StringType())
-])
+hazmat_cols = [
+	"identifier",
+	"container_number",
+	"hazmat_sequence_number",
+	"hazmat_code",
+	"hazmat_class",
+	"hazmat_code_qualifier",
+	"hazmat_contact",
+	"hazmat_page_number",
+	"hazmat_flash_point_temperature",
+	"hazmat_flash_point_temperature_negative_ind",
+	"hazmat_flash_point_temperature_unit",
+	"hazmat_description",
+]
 
-hazmat_class_schema = StructType([
-	StructField("identifier", StringType()),
-	StructField("container_number", StringType()),
-	StructField("hazmat_sequence_number", StringType()),
-	StructField("hazmat_classification", StringType())
-])
+hazmat_class_cols = [
+	"identifier",
+	"container_number",
+	"hazmat_sequence_number",
+	"hazmat_classification",
+]
 
 schema_map = {
-	'cargodesc': cargo_desc_schema,
-	'hazmat': hazmat_schema,
-	'hazmatclass': hazmat_class_schema
+	'cargodesc': cargo_desc_cols,
+	'hazmat': hazmat_cols,
+	'hazmatclass': hazmat_class_cols
 }
 
 def create_spark_session():
@@ -48,12 +48,13 @@ def create_spark_session():
 
 	return spark
 
-def create_temp_view(spark, name, schema, local_run=False):
+def create_temp_view(spark, name, columns, local_run=False):
 	df = spark.read \
 		.option("header", True) \
 		.option("escape", '"') \
-		.csv(f"{'.' if local_run else ''}/input/ams/*/*/ams__{name}_*__*.csv")
-		.select(*schema.fieldNames())
+		.option("inferSchema", True) \
+		.csv(f"{'.' if local_run else ''}/input/ams/*/*/ams__{name}_*__*.csv") \
+		.select(*columns)
 
 	df.createOrReplaceTempView(name)
 
