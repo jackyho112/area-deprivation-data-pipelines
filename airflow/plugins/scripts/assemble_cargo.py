@@ -2,21 +2,21 @@ import argparse
 
 from pyspark.sql import SparkSession
 from pyspark.sql.types import (
-	StructType, StructField, StringType, IntegerType
+	StructType, StructField, StringType
 )
 
 cargo_desc_schema = StructType([
 	StructField("identifier", StringType()),
 	StructField("container_number", StringType()),
-	StructField("description_sequence_number", IntegerType()),
-	StructField("piece_count", IntegerType()),
+	StructField("description_sequence_number", StringType()),
+	StructField("piece_count", StringType()),
 	StructField("description_text", StringType())
 ])
 
 hazmat_schema = StructType([
 	StructField("identifier", StringType()),
 	StructField("container_number", StringType()),
-	StructField("hazmat_sequence_number", IntegerType()),
+	StructField("hazmat_sequence_number", StringType()),
 	StructField("hazmat_code", StringType()),
 	StructField("hazmat_class", StringType()),
 	StructField("hazmat_code_qualifier", StringType()),
@@ -29,10 +29,10 @@ hazmat_schema = StructType([
 ])
 
 hazmat_class_schema = StructType([
-	StructField("identifier", IntegerType()),
+	StructField("identifier", StringType()),
 	StructField("container_number", StringType()),
-	StructField("hazmat_sequence_number", IntegerType()),
-	StructField("hazmat_classification", IntegerType())
+	StructField("hazmat_sequence_number", StringType()),
+	StructField("hazmat_classification", StringType())
 ])
 
 schema_map = {
@@ -52,11 +52,8 @@ def create_temp_view(spark, name, schema, local_run=False):
 	df = spark.read \
 		.option("header", True) \
 		.option("escape", '"') \
-		.csv(
-			f"{'.' if local_run else ''}/input/ams/*/*/ams__{name}_*__*.csv",
-			schema=schema,
-			enforceSchema=True
-		)
+		.csv(f"{'.' if local_run else ''}/input/ams/*/*/ams__{name}_*__*.csv")
+		.select(*schema.fieldNames())
 
 	df.createOrReplaceTempView(name)
 

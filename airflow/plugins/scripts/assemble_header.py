@@ -2,7 +2,7 @@ import argparse
 
 from pyspark.sql import SparkSession
 from pyspark.sql.types import (
-	StructType, StructField, StringType, IntegerType, DateType
+	StructType, StructField, StringType
 )
 
 header_schema = StructType([
@@ -14,9 +14,9 @@ header_schema = StructType([
     StructField("estimated_arrival_date", DateType()),
     StructField("foreign_port_of_lading_qualifier", StringType()),
     StructField("foreign_port_of_lading", StringType()),
-    StructField("manifest_quantity", IntegerType()),
+    StructField("manifest_quantity", StringType()),
     StructField("manifest_unit", StringType()),
-    StructField("weight", IntegerType()),
+    StructField("weight", StringType()),
     StructField("weight_unit", StringType()),
     StructField("record_status_indicator", StringType()),
     StructField("place_of_receipt", StringType()),
@@ -26,8 +26,9 @@ header_schema = StructType([
     StructField("conveyance_id_qualifier", StringType()),
     StructField("conveyance_id", StringType()),
     StructField("mode_of_transportation", StringType()),
-    StructField("actual_arrival_date", DateType())
+    StructField("actual_arrival_date", StringType())
 ])
+header_field_names = header_schema.fieldNames()
 
 bill_schema = StructType([
     StructField("identifier", StringType()),
@@ -36,10 +37,11 @@ bill_schema = StructType([
     StructField("sub_house_bol_number", StringType()),
     StructField("voyage_number", StringType()),
     StructField("bill_type_code", StringType()),
-    StructField("manifest_number", IntegerType()),
-    StructField("trade_update_date", DateType()),
-    StructField("run_date", DateType())
+    StructField("manifest_number", StringType()),
+    StructField("trade_update_date", StringType()),
+    StructField("run_date", StringType())
 ])
+bill_field_names = bill_schema.fieldNames()
 
 def create_spark_session():
 	spark = SparkSession \
@@ -52,20 +54,14 @@ def process_header_data(spark, local_run=False):
 	header = spark.read \
 		.option("header", True) \
 		.option("escape", '"') \
-		.csv(
-			f"{'.' if local_run else ''}/input/ams/*/*/ams__header_*__*.csv",
-			schema=header_schema,
-			enforceSchema=True
-		)
+		.csv(f"{'.' if local_run else ''}/input/ams/*/*/ams__header_*__*.csv") \
+		.select(*header_field_names)
 
 	bill = spark.read \
 		.option("header", True) \
 		.option("escape", '"') \
-		.csv(
-			f"{'.' if local_run else ''}/input/ams/*/*/ams__billgen_*__*.csv",
-			schema=bill_schema,
-			enforceSchema=True
-		)
+		.csv(f"{'.' if local_run else ''}/input/ams/*/*/ams__billgen_*__*.csv") \
+		.select(*bill_field_names)
 
 	header_full = header.join(bill, ['identifier'], how='left')
 
