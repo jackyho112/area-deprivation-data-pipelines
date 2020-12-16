@@ -2,7 +2,7 @@ import argparse
 
 from pyspark.sql import SparkSession
 
-kept_header_cols = [
+header_cols = [
     "identifier",
     "carrier_code",
     "vessel_country_code",
@@ -26,7 +26,7 @@ kept_header_cols = [
     "actual_arrival_date",
 ]
 
-kept_bill_cols = [
+bill_cols = [
     "identifier",
     "master_bol_number",
     "house_bol_number",
@@ -51,18 +51,18 @@ def process_header_data(spark, local_run=False):
 		.option("escape", '"') \
         .option("inferSchema", True) \
 		.csv(f"{'.' if local_run else ''}/input/ams/*/*/ams__header_*__*.csv") \
-		.select(*kept_header_cols)
+		.select(*header_cols)
 
 	bill = spark.read \
 		.option("header", True) \
 		.option("escape", '"') \
         .option("inferSchema", True) \
 		.csv(f"{'.' if local_run else ''}/input/ams/*/*/ams__billgen_*__*.csv") \
-		.select(*kept_bill_cols)
+		.select(*bill_cols)
 
 	header_full = header.join(bill, ['identifier'], how='left')
 
-	contact_df.repartition(1).write.mode('overwrite').format("csv") \
+	header_full.repartition(1).write.mode('overwrite').format("csv") \
 		.option("header", True) \
 		.option("escape", '"') \
 		.save(f"{'.' if local_run else ''}/output/header/")
