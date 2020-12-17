@@ -78,7 +78,12 @@ spark_steps = [ # Note the params values are supplied to the operator
     }
 ]
 
-record_scripts = [('assemble_contacts.py', 'contact'), ('assemble_cargo.py', 'cargo')]
+record_scripts = [
+    ('assemble_contacts.py', 'contact'), 
+    ('assemble_cargo.py', 'cargo'),
+    ('assemble_header.py', 'header'),
+    ('assemble_container.py', 'container')
+]
 for (script_file, record_name) in record_scripts:
     spark_steps.append({
         "Name": f"Process {record_name} data",
