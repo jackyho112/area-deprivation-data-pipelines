@@ -16,7 +16,7 @@ default_args = {
     'owner': 'jackyho',
     'start_date': datetime(2019, 1, 1),
     'retry_delay': timedelta(minutes=30),
-    'retries': 3,
+    'retries': 1,
 	'depends_on_past': False,
     'catchup': False,
     'email_on_retry': False,
@@ -202,3 +202,6 @@ s3_bucket_sensor >> [
     clear_s3_output_operator,
 	create_emr_cluster
 ] >> add_emr_steps
+add_emr_steps >> step_checker
+step_checker >> terminate_emr_cluster
+

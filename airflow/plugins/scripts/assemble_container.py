@@ -49,7 +49,7 @@ def main(input_dir, output):
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i', '--input', default='/input')
-	parser.add_argument('-o', '--output', default='/ouput')
+	parser.add_argument('-o', '--output', default='/output')
 	args = parser.parse_args()
 
-	main(args.input, args.ouput)
+	main(args.input, args.output)
