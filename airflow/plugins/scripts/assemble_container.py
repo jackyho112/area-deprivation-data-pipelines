@@ -21,34 +21,35 @@ def create_spark_session():
 
 	return spark
 
-def process_container_data(spark, local_run):
+def process_container_data(spark, input_dir, output):
 	container = spark.read \
 		.option("header", True) \
 		.option("escape", '"') \
         .option("inferSchema", True) \
-		.csv(f"{'.' if local_run else ''}/input/ams/*/*/ams__container_*__*.csv") \
+		.csv(f"{input_dir}/ams/*/*/ams__container_*__*.csv") \
 		.select(*container_cols)
 
 	mark = spark.read \
 		.option("header", True) \
 		.option("escape", '"') \
         .option("inferSchema", True) \
-		.csv(f"{'.' if local_run else ''}/input/ams/*/*/ams__marksnumbers_*__*.csv") \
+		.csv(f"{input_dir}/ams/*/*/ams__marksnumbers_*__*.csv") \
 
 	container_full = container.join(mark, ['identifier', 'container_number'], how='left')
 
 	container_full.repartition(1).write.mode('overwrite').format("csv") \
 		.option("header", True) \
 		.option("escape", '"') \
-		.save(f"{'.' if local_run else ''}/output/container/")
+		.save(f"{output}/container/")
 
-def main(local_run):
+def main(input_dir, output):
 	spark = create_spark_session()
-	process_container_data(spark, local_run)
+	process_container_data(spark, input_dir, output)
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-l', '--local', action='store_true')
+	parser.add_argument('-i', '--input', default='/input')
+	parser.add_argument('-o', '--output', default='/ouput')
 	args = parser.parse_args()
 
-	main(args.local)
+	main(args.input, args.ouput)

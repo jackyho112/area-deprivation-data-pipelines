@@ -45,19 +45,19 @@ def create_spark_session():
 
 	return spark
 
-def process_header_data(spark, local_run=False):
+def process_header_data(spark, input_dir, output):
 	header = spark.read \
 		.option("header", True) \
 		.option("escape", '"') \
         .option("inferSchema", True) \
-		.csv(f"{'.' if local_run else ''}/input/ams/*/*/ams__header_*__*.csv") \
+		.csv(f"{input_dir}/ams/*/*/ams__header_*__*.csv") \
 		.select(*header_cols)
 
 	bill = spark.read \
 		.option("header", True) \
 		.option("escape", '"') \
         .option("inferSchema", True) \
-		.csv(f"{'.' if local_run else ''}/input/ams/*/*/ams__billgen_*__*.csv") \
+		.csv(f"{input_dir}/ams/*/*/ams__billgen_*__*.csv") \
 		.select(*bill_cols)
 
 	header_full = header.join(bill, ['identifier'], how='left')
@@ -65,15 +65,17 @@ def process_header_data(spark, local_run=False):
 	header_full.repartition(1).write.mode('overwrite').format("csv") \
 		.option("header", True) \
 		.option("escape", '"') \
-		.save(f"{'.' if local_run else ''}/output/header/")
+		.save(f"{output}/header/")
 
-def main(local_run):
+def main(input_dir, output):
 	spark = create_spark_session()
-	process_header_data(spark, local_run)
+	process_header_data(spark, input_dir, output)
 
 if __name__ == "__main__":
-	parser = argparse.ArgumentParser()
-	parser.add_argument('-l', '--local', action='store_true')
-	args = parser.parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-i', '--input', default='/input')
+    parser.add_argument('-o', '--output', default='/ouput')
+    args = parser.parse_args()
 
-	main(args.local)
+    main(args.input, args.ouput)
+

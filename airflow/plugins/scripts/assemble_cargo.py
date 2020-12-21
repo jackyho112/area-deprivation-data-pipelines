@@ -1,45 +1,8 @@
 import argparse
 
 from pyspark.sql import SparkSession
-from pyspark.sql.types import (
-	StructType, StructField, StringType
-)
 
-cargo_desc_cols = [
-	"identifier",
-	"container_number",
-	"description_sequence_number",
-	"piece_count",
-	"description_text"
-]
-
-hazmat_cols = [
-	"identifier",
-	"container_number",
-	"hazmat_sequence_number",
-	"hazmat_code",
-	"hazmat_class",
-	"hazmat_code_qualifier",
-	"hazmat_contact",
-	"hazmat_page_number",
-	"hazmat_flash_point_temperature",
-	"hazmat_flash_point_temperature_negative_ind",
-	"hazmat_flash_point_temperature_unit",
-	"hazmat_description",
-]
-
-hazmat_class_cols = [
-	"identifier",
-	"container_number",
-	"hazmat_sequence_number",
-	"hazmat_classification",
-]
-
-schema_map = {
-	'cargodesc': cargo_desc_cols,
-	'hazmat': hazmat_cols,
-	'hazmatclass': hazmat_class_cols
-}
+dataset_names = ['cargodesc', 'hazmat', 'hazmatclass']
 
 def create_spark_session():
 	spark = SparkSession \
@@ -48,19 +11,18 @@ def create_spark_session():
 
 	return spark
 
-def create_temp_view(spark, name, columns, local_run=False):
+def create_temp_view(spark, name, input_dir):
 	df = spark.read \
 		.option("header", True) \
 		.option("escape", '"') \
 		.option("inferSchema", True) \
-		.csv(f"{'.' if local_run else ''}/input/ams/*/*/ams__{name}_*__*.csv") \
-		.select(*columns)
+		.csv(f"{input_dir}/ams/*/*/ams__{name}_*__*.csv") \
 
 	df.createOrReplaceTempView(name)
 
-def process_cargo_data(spark, local_run=False):
-	for name, schema in schema_map.items():
-		create_temp_view(spark, name, schema, local_run)
+def process_cargo_data(spark, input_dir, output):
+	for name in dataset_names:
+		create_temp_view(spark, name, input_dir)
 
 	cargo_table = spark.sql("""
 		SELECT 
@@ -71,8 +33,8 @@ def process_cargo_data(spark, local_run=False):
 			c.description_text AS description,
 			h.hazmat_code,
 			(CASE 
-				WHEN (h.hazmat_class IS NOT NULL) THEN h.hazmat_class
-				ELSE hc.hazmat_classification
+				WHEN (hc.hazmat_classification IS NOT NULL) THEN hc.hazmat_classification
+				ELSE h.hazmat_class
 			END) AS hazmat_class,
 			h.hazmat_code_qualifier,
 			h.hazmat_contact,
@@ -97,15 +59,16 @@ def process_cargo_data(spark, local_run=False):
 	cargo_table.repartition(1).write.mode('overwrite').format("csv") \
 		.option("header", True) \
 		.option("escape", '"') \
-		.save(f"{'.' if local_run else ''}/output/cargo/")
+		.save(f"{output}/cargo/")
 
-def main(local_run):
+def main(input_dir, output):
 	spark = create_spark_session()
-	process_cargo_data(spark, local_run)
+	process_cargo_data(spark, input_dir, output)
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-l', '--local', action='store_true')
+	parser.add_argument('-i', '--input', default='/input')
+	parser.add_argument('-o', '--output', default='/ouput')
 	args = parser.parse_args()
 
-	main(args.local)
+	main(args.input, args.ouput)

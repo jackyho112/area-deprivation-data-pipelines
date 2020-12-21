@@ -31,19 +31,19 @@ def create_spark_session():
 
 	return spark
 
-def get_contact_dataframe(spark, name, local_run=False):
+def get_contact_dataframe(spark, name, input_dir):
 	df = spark.read \
 		.option("header", True) \
 		.option("escape", '"') \
 		.option("enforceSchema", True) \
 		.option("schema", contact_schema) \
-		.csv(f"{'.' if local_run else ''}/input/ams/*/*/ams__{name}_*__*.csv")
+		.csv(f"{input_dir}/ams/*/*/ams__{name}_*__*.csv")
 
 	return df.withColumn('contact_type', lit(name))
 
-def process_contact_data(spark, local_run=False):
+def process_contact_data(spark, input_dir, ouput):
 	contact_dfs = list(map(
-		lambda name: get_contact_dataframe(spark, name, local_run), 
+		lambda name: get_contact_dataframe(spark, name, input_dir), 
 		contacts
 	))
 	contact_df = functools.reduce(lambda a,b: a.union(b), contact_dfs)
@@ -51,15 +51,16 @@ def process_contact_data(spark, local_run=False):
 	contact_df.repartition(1).write.mode('overwrite').format("csv") \
 		.option("header", True) \
 		.option("escape", '"') \
-		.save(f"{'.' if local_run else ''}/output/contact/")
+		.save(f"{ouput}/contact/")
 
-def main(local_run):
+def main(input_dir, output):
 	spark = create_spark_session()
-	process_contact_data(spark, local_run)
+	process_contact_data(spark, input_dir, output)
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-l', '--local', action='store_true')
+	parser.add_argument('-i', '--input', default='/input')
+	parser.add_argument('-o', '--output', default='/ouput')
 	args = parser.parse_args()
 
-	main(args.local)
+	main(args.input, args.ouput)
