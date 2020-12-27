@@ -54,6 +54,7 @@ def process_cargo_data(spark, input_dir, output):
 			c.identifier = hc.identifier AND 
 			c.container_number = hc.container_number AND 
 			c.description_sequence_number = hc.hazmat_sequence_number
+		WHERE c.identifier IS NOT NULL AND c.container_number IS NOT NULL
 	""")
 
 	cargo_table.repartition(1).write.mode('overwrite').format("csv") \

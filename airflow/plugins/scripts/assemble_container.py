@@ -1,6 +1,7 @@
 import argparse
 
 from pyspark.sql import SparkSession
+from pyspark.sql.functions import col
 
 container_cols = [
 	"identifier",
@@ -28,6 +29,7 @@ def process_container_data(spark, input_dir, output):
         .option("inferSchema", True) \
 		.csv(f"{input_dir}/ams/*/*/ams__container_*__*.csv") \
 		.select(*container_cols)
+		.where(col('identifier').isNotNull() & col('container_number').isNotNull())
 
 	mark = spark.read \
 		.option("header", True) \

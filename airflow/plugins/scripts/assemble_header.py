@@ -1,6 +1,7 @@
 import argparse
 
 from pyspark.sql import SparkSession
+from pyspark.sql.functions import col
 
 header_cols = [
     "identifier",
@@ -51,7 +52,8 @@ def process_header_data(spark, input_dir, output):
 		.option("escape", '"') \
         .option("inferSchema", True) \
 		.csv(f"{input_dir}/ams/*/*/ams__header_*__*.csv") \
-		.select(*header_cols)
+		.select(*header_cols) \
+        .where(col('identifier').isNotNull())
 
 	bill = spark.read \
 		.option("header", True) \

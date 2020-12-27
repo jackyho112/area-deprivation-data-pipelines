@@ -5,7 +5,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.types import (
 	StructType, StringType, StructField
 )
-from pyspark.sql.functions import lit
+from pyspark.sql.functions import lit, col
 
 contact_schema = StructType([
 	StructField("identifier", StringType()),
@@ -38,6 +38,7 @@ def get_contact_dataframe(spark, name, input_dir):
 		.option("enforceSchema", True) \
 		.option("schema", contact_schema) \
 		.csv(f"{input_dir}/ams/*/*/ams__{name}_*__*.csv")
+		.where(col('identifier').isNotNull())
 
 	return df.withColumn('contact_type', lit(name))
 
