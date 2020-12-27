@@ -100,6 +100,20 @@ for (script_file, record_name) in record_scripts:
     })
 
 spark_steps.append({
+    "Name": "Run data tests",
+    "ActionOnFailure": "CANCEL_AND_WAIT",
+    "HadoopJarStep": {
+        "Jar": "command-runner.jar",
+        "Args": [ 
+            'spark-submit',
+            '--deploy-mode',
+            'client',
+            's3://{{ params.bucket }}/scripts/data_test.py'
+        ],
+    }
+})
+
+spark_steps.append({
     "Name": "Move clean data from HDFS to S3",
     "ActionOnFailure": "CANCEL_AND_WAIT",
     "HadoopJarStep": {
@@ -132,7 +146,7 @@ load_input_to_s3_bucket_operator = LoadInputToS3Operator(
 	task_id='load_input_to_s3_bucket',
 	dataset_id=Variable.get('data_exchange_dataset_id'),
 	bucket_name=Variable.get('s3_raw_data_bucket'),
-	region_name=Variable.get('data_exchange_dataset_regionn'),
+	region_name=Variable.get('data_exchange_dataset_region'),
 	timeout=600,
 	poke_interval=300,
 	dag=dag

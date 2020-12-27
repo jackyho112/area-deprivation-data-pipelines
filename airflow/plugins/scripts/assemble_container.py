@@ -28,7 +28,7 @@ def process_container_data(spark, input_dir, output):
 		.option("escape", '"') \
         .option("inferSchema", True) \
 		.csv(f"{input_dir}/ams/*/*/ams__container_*__*.csv") \
-		.select(*container_cols)
+		.select(*container_cols) \
 		.where(col('identifier').isNotNull() & col('container_number').isNotNull())
 
 	mark = spark.read \

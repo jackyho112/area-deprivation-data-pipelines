@@ -1,5 +1,5 @@
 {
     "s3_raw_data_bucket": "jacky-data-engineering-us-export",
     "data_exchange_dataset_id": "d0e9bd6148e8f14889980954017b0927",
-    "data_exchange_dataset_regionn": "us-east-1"
+    "data_exchange_dataset_region": "us-east-1"
 }

@@ -41,7 +41,7 @@ def get_dataframe(spark, name):
 		.option("header", True) \
 		.option("escape", '"') \
 		.option("inferSchema", True) \
-		.csv(f"/output/{name}/*.csv") \
+		.csv(f"/output/{name}/*.csv")
 
 def check_data(spark):
 	messages = []

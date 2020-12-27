@@ -37,7 +37,7 @@ def get_contact_dataframe(spark, name, input_dir):
 		.option("escape", '"') \
 		.option("enforceSchema", True) \
 		.option("schema", contact_schema) \
-		.csv(f"{input_dir}/ams/*/*/ams__{name}_*__*.csv")
+		.csv(f"{input_dir}/ams/*/*/ams__{name}_*__*.csv") \
 		.where(col('identifier').isNotNull())
 
 	return df.withColumn('contact_type', lit(name))

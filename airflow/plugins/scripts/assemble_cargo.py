@@ -16,7 +16,7 @@ def create_temp_view(spark, name, input_dir):
 		.option("header", True) \
 		.option("escape", '"') \
 		.option("inferSchema", True) \
-		.csv(f"{input_dir}/ams/*/*/ams__{name}_*__*.csv") \
+		.csv(f"{input_dir}/ams/*/*/ams__{name}_*__*.csv")
 
 	df.createOrReplaceTempView(name)
 
