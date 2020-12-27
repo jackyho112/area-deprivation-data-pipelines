@@ -17,14 +17,15 @@ def create_spark_session():
 	return spark
 
 def check_for_empty_data(df, name):
-	if contact.count() > 0:
+	if df.count() > 0:
 		return []
 	else:
 		return [f"The {name} dataframe is empty."]
 
 def check_row_fullness(df, name, rows):
 	row_selects = list(map(
-		lambda x: count(when(isnull(col(x)), col(x))).alias(x)
+		lambda x: count(when(isnull(col(x)), col(x))).alias(x),
+		rows
 	))
 
 	collected_rows = df.select(row_selects).collect()[0]
@@ -32,7 +33,7 @@ def check_row_fullness(df, name, rows):
 	messages = []
 	for idx, c in enumerate(collected_rows):
 		if c != 0:
-			messages.append(f"The {rows[idx]} row has {c} empty values.")
+			messages.append(f"The {rows[idx]} row from {name} has {c} empty values.")
 
 	return messages
 
