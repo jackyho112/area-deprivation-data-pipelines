@@ -23,6 +23,18 @@ def create_spark_session():
 	return spark
 
 def process_container_data(spark, input_dir, output):
+    """
+    Process container data by joining the container and mark data
+    
+    Parameters
+    ----------
+    spark : Spark session
+    	Current Spark session
+    input_dir : str
+    	Input directory
+    output : str
+    	Input directory
+    """
 	container = spark.read \
 		.option("header", True) \
 		.option("escape", '"') \
@@ -45,6 +57,16 @@ def process_container_data(spark, input_dir, output):
 		.save(f"{output}/container/")
 
 def main(input_dir, output):
+    """
+    Process container data by joining the container and mark data
+    
+    Parameters
+    ----------
+    input_dir : str
+    	Input directory
+    output : str
+    	Input directory
+    """
 	spark = create_spark_session()
 	process_container_data(spark, input_dir, output)
 

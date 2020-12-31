@@ -24,12 +24,16 @@ class CheckForBucketOperator(BaseOperator):
 
 	def execute(self):
 		"""
-		Check whether the S3 bucket is available
+		Check whether the S3 bucket is available as well as its log bucket
 		"""
 		s3 = S3Hook()
-		bucket_exists = s3.check_for_bucket(self.bucket_name)
 
+		bucket_exists = s3.check_for_bucket(self.bucket_name)
 		if not bucket_exists:
 			raise AirflowException(f"The bucket {bucket_name} does not exist!")
+
+		bucket_exists = s3.check_for_bucket(self.bucket_name + '-logs')
+		if not bucket_exists:
+			raise AirflowException(f"The bucket {bucket_name}-logs does not exist!")
 
 		return True

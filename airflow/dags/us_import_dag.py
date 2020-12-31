@@ -38,7 +38,7 @@ aws_emr_job_flow_overrides = {
             ],
         }
     ],
-    "LogUri": f"s3://{Variable.get('s3_raw_data_bucket')}-logs/",
+    "LogUri": f"s3://{Variable.get('s3_raw_data_bucket')}-logs/", # This bucket needs to be available
     "Instances": {
         "InstanceGroups": [
             {

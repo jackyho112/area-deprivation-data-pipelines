@@ -56,7 +56,7 @@ class EntitledAssets():
 
 	    Returns
 	    -------
-	    list
+	    list (dict)
 	        Dataset revision assets
 	    """
 		assets = []
@@ -83,7 +83,7 @@ class EntitledAssets():
 	    
 	    Parameters
 	    ----------
-	    assets : list
+	    assets : list (dict)
 	        Info regarding the assets
 	    bucket : str
 	        The bucket name

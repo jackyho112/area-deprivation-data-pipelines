@@ -47,6 +47,18 @@ def create_spark_session():
 	return spark
 
 def process_header_data(spark, input_dir, output):
+    """
+    Process header data by joining the header and bill data
+    
+    Parameters
+    ----------
+    spark : Spark session
+        Current Spark session
+    input_dir : str
+        Input directory
+    output : str
+        Input directory
+    """
 	header = spark.read \
 		.option("header", True) \
 		.option("escape", '"') \
@@ -70,6 +82,16 @@ def process_header_data(spark, input_dir, output):
 		.save(f"{output}/header/")
 
 def main(input_dir, output):
+    """
+    Process header data by joining the header and bill data
+    
+    Parameters
+    ----------
+    input_dir : str
+        Input directory
+    output : str
+        Input directory
+    """
 	spark = create_spark_session()
 	process_header_data(spark, input_dir, output)
 

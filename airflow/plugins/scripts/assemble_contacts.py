@@ -32,6 +32,23 @@ def create_spark_session():
 	return spark
 
 def get_contact_dataframe(spark, name, input_dir):
+    """
+    Get a contact dataframe
+    
+    Parameters
+    ----------
+    spark : Spark session
+    	Current Spark session
+    name : str
+    	Name of the dataset
+    input_dir : str
+    	Input directory
+
+	Returns
+    -------
+    Spark dataset
+        The contact dataset
+    """
 	df = spark.read \
 		.option("header", True) \
 		.option("escape", '"') \
@@ -43,6 +60,18 @@ def get_contact_dataframe(spark, name, input_dir):
 	return df.withColumn('contact_type', lit(name))
 
 def process_contact_data(spark, input_dir, ouput):
+    """
+    Process contact data by concatenating the contact dataframes 
+    
+    Parameters
+    ----------
+    spark : Spark session
+    	Current Spark session
+    input_dir : str
+    	Input directory
+    output : str
+    	Input directory
+    """
 	contact_dfs = list(map(
 		lambda name: get_contact_dataframe(spark, name, input_dir), 
 		contacts
@@ -55,6 +84,16 @@ def process_contact_data(spark, input_dir, ouput):
 		.save(f"{ouput}/contact/")
 
 def main(input_dir, output):
+    """
+    Process contact data by concatenating the contact dataframes 
+    
+    Parameters
+    ----------
+    input_dir : str
+    	Input directory
+    output : str
+    	Input directory
+    """
 	spark = create_spark_session()
 	process_contact_data(spark, input_dir, output)
 
