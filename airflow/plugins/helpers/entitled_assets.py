@@ -3,15 +3,62 @@ import time
 # Reference: https://github.com/aws-samples/aws-dataexchange-api-samples#python
 class EntitledAssets():
 	def __init__(self, data_exchange_client):
+	    """
+	    Parameters
+	    ----------
+	    data_exchange_client : AWS Data Exchange client
+	        An AWS Data Exchange client from the AWS library or Airflow AWS hook
+	    """
 		self.data_exchange_client = data_exchange_client
 
 	def get_dataset_info(self, dataset_id):
+	    """
+	    Get the Data Exchange dataset info
+	    
+	    Parameters
+	    ----------
+	    dataset_id : str
+	        The dataset id
+
+	    Returns
+	    -------
+	    dict
+	        The dataset info
+	    """
 		return self.data_exchange_client.get_data_set(DataSetId=dataset_id)
 
 	def list_dataset_revisions(self, dataset_id):
+	    """
+	    Get the Data Exchange dataset revisions
+	    
+	    Parameters
+	    ----------
+	    dataset_id : str
+	        The dataset id
+
+	    Returns
+	    -------
+	    dict
+	        The dataset revisions
+	    """
 		return self.data_exchange_client.list_data_set_revisions(DataSetId=dataset_id)
 
 	def get_all_dataset_asset_infos(self, dataset_id, revision_id):
+	    """
+	    Get the Data Exchange dataset revision assets' info
+	    
+	    Parameters
+	    ----------
+	    dataset_id : str
+	        The dataset id
+	    revision_id : str
+	        The revision id
+
+	    Returns
+	    -------
+	    list
+	        Dataset revision assets
+	    """
 		assets = []
 
 		client = self.data_exchange_client
@@ -31,6 +78,22 @@ class EntitledAssets():
 		return assets
 
 	def export_assets(self, assets, bucket, folder='input/'):
+	    """
+	    Export assets to a bucket
+	    
+	    Parameters
+	    ----------
+	    assets : list
+	        Info regarding the assets
+	    bucket : str
+	        The bucket name
+	    folder : str
+	    	The bucket key to put assets in
+
+	    Returns
+	    -------
+	    Bool
+	    """
 		asset_destinations = []
 		client = self.data_exchange_client
 

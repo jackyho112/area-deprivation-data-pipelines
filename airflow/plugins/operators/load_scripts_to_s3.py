@@ -14,11 +14,22 @@ class LoadScriptsToS3Operator(BaseOperator):
 		*args, 
 		**kwargs
 	):
+		"""
+	    Parameters
+	    ----------
+	    bucket_name : str
+	        The bucket name for deposit
+	    folder_key : str
+	        The folder key to put scripts in
+	    """
 		super(LoadScriptsToS3Operator, self).__init__(*args, **kwargs)
 		self.bucket_name = bucket_name
 		self.folder_key = folder_key
 
 	def execute(self, context):
+		"""
+		Move local scripts to S3 bucket
+	    """
 		s3 = S3Hook()
 
 		os.chdir(os.path.dirname(os.path.abspath(__file__)))

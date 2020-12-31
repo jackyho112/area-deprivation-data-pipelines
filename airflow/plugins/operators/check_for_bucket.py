@@ -13,10 +13,19 @@ class CheckForBucketOperator(BaseOperator):
 		*args, 
 		**kwargs
 	):
+	    """
+	    Parameters
+	    ----------
+	    bucket_name : str
+	        The bucket name to check for availability
+	    """
 		super(CheckForBucketOperator, self).__init__(*args, **kwargs)
 		self.bucket_name = bucket_name
 
-	def execute(self, context):
+	def execute(self):
+		"""
+		Check whether the S3 bucket is available
+		"""
 		s3 = S3Hook()
 		bucket_exists = s3.check_for_bucket(self.bucket_name)
 

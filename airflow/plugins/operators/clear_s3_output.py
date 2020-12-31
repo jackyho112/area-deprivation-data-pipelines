@@ -12,10 +12,19 @@ class ClearS3OutputOperator(BaseOperator):
 		*args, 
 		**kwargs
 	):
+	    """
+	    Parameters
+	    ----------
+	    bucket_name : str
+	        The bucket name to delete the output folder in
+	    """
 		super(ClearS3OutputOperator, self).__init__(*args, **kwargs)
 		self.bucket_name = bucket_name
 
-	def execute(self, context):
+	def execute(self):
+		"""
+		Delete the output folder in a bucket
+		"""
 		s3 = S3Hook()
 
 		bucket = s3.get_bucket(self.bucket_name)
