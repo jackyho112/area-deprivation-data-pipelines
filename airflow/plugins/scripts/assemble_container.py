@@ -23,22 +23,22 @@ def create_spark_session():
 	return spark
 
 def process_container_data(spark, input_dir, output):
-    """
-    Process container data by joining the container and mark data
-    
-    Parameters
-    ----------
-    spark : Spark session
-    	Current Spark session
-    input_dir : str
-    	Input directory
-    output : str
-    	Input directory
-    """
+	"""
+	Process container data by joining the container and mark data
+	
+	Parameters
+	----------
+	spark : Spark session
+		Current Spark session
+	input_dir : str
+		Input directory
+	output : str
+		Input directory
+	"""
 	container = spark.read \
 		.option("header", True) \
 		.option("escape", '"') \
-        .option("inferSchema", True) \
+		.option("inferSchema", True) \
 		.csv(f"{input_dir}/ams/*/*/ams__container_*__*.csv") \
 		.select(*container_cols) \
 		.where(col('identifier').isNotNull() & col('container_number').isNotNull())
@@ -46,7 +46,7 @@ def process_container_data(spark, input_dir, output):
 	mark = spark.read \
 		.option("header", True) \
 		.option("escape", '"') \
-        .option("inferSchema", True) \
+		.option("inferSchema", True) \
 		.csv(f"{input_dir}/ams/*/*/ams__marksnumbers_*__*.csv") \
 
 	container_full = container.join(mark, ['identifier', 'container_number'], how='left')
@@ -57,16 +57,16 @@ def process_container_data(spark, input_dir, output):
 		.save(f"{output}/container/")
 
 def main(input_dir, output):
-    """
-    Process container data by joining the container and mark data
-    
-    Parameters
-    ----------
-    input_dir : str
-    	Input directory
-    output : str
-    	Input directory
-    """
+	"""
+	Process container data by joining the container and mark data
+	
+	Parameters
+	----------
+	input_dir : str
+		Input directory
+	output : str
+		Input directory
+	"""
 	spark = create_spark_session()
 	process_container_data(spark, input_dir, output)
 

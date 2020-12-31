@@ -4,39 +4,39 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
 
 header_cols = [
-    "identifier",
-    "carrier_code",
-    "vessel_country_code",
-    "vessel_name",
-    "port_of_unlading",
-    "estimated_arrival_date",
-    "foreign_port_of_lading_qualifier",
-    "foreign_port_of_lading",
-    "manifest_quantity",
-    "manifest_unit",
-    "weight",
-    "weight_unit",
-    "record_status_indicator",
-    "place_of_receipt",
-    "port_of_destination",
-    "foreign_port_of_destination_qualifier",
-    "foreign_port_of_destination",
-    "conveyance_id_qualifier",
-    "conveyance_id",
-    "mode_of_transportation",
-    "actual_arrival_date",
+	"identifier",
+	"carrier_code",
+	"vessel_country_code",
+	"vessel_name",
+	"port_of_unlading",
+	"estimated_arrival_date",
+	"foreign_port_of_lading_qualifier",
+	"foreign_port_of_lading",
+	"manifest_quantity",
+	"manifest_unit",
+	"weight",
+	"weight_unit",
+	"record_status_indicator",
+	"place_of_receipt",
+	"port_of_destination",
+	"foreign_port_of_destination_qualifier",
+	"foreign_port_of_destination",
+	"conveyance_id_qualifier",
+	"conveyance_id",
+	"mode_of_transportation",
+	"actual_arrival_date",
 ]
 
 bill_cols = [
-    "identifier",
-    "master_bol_number",
-    "house_bol_number",
-    "sub_house_bol_number",
-    "voyage_number",
-    "bill_type_code",
-    "manifest_number",
-    "trade_update_date",
-    "run_date"
+	"identifier",
+	"master_bol_number",
+	"house_bol_number",
+	"sub_house_bol_number",
+	"voyage_number",
+	"bill_type_code",
+	"manifest_number",
+	"trade_update_date",
+	"run_date"
 ]
 
 def create_spark_session():
@@ -47,30 +47,30 @@ def create_spark_session():
 	return spark
 
 def process_header_data(spark, input_dir, output):
-    """
-    Process header data by joining the header and bill data
-    
-    Parameters
-    ----------
-    spark : Spark session
-        Current Spark session
-    input_dir : str
-        Input directory
-    output : str
-        Input directory
-    """
+	"""
+	Process header data by joining the header and bill data
+	
+	Parameters
+	----------
+	spark : Spark session
+		Current Spark session
+	input_dir : str
+		Input directory
+	output : str
+		Input directory
+	"""
 	header = spark.read \
 		.option("header", True) \
 		.option("escape", '"') \
-        .option("inferSchema", True) \
+		.option("inferSchema", True) \
 		.csv(f"{input_dir}/ams/*/*/ams__header_*__*.csv") \
 		.select(*header_cols) \
-        .where(col('identifier').isNotNull())
+		.where(col('identifier').isNotNull())
 
 	bill = spark.read \
 		.option("header", True) \
 		.option("escape", '"') \
-        .option("inferSchema", True) \
+		.option("inferSchema", True) \
 		.csv(f"{input_dir}/ams/*/*/ams__billgen_*__*.csv") \
 		.select(*bill_cols)
 
@@ -82,24 +82,24 @@ def process_header_data(spark, input_dir, output):
 		.save(f"{output}/header/")
 
 def main(input_dir, output):
-    """
-    Process header data by joining the header and bill data
-    
-    Parameters
-    ----------
-    input_dir : str
-        Input directory
-    output : str
-        Input directory
-    """
+	"""
+	Process header data by joining the header and bill data
+	
+	Parameters
+	----------
+	input_dir : str
+		Input directory
+	output : str
+		Input directory
+	"""
 	spark = create_spark_session()
 	process_header_data(spark, input_dir, output)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--input', default='/input')
-    parser.add_argument('-o', '--output', default='/output')
-    args = parser.parse_args()
+	parser = argparse.ArgumentParser()
+	parser.add_argument('-i', '--input', default='/input')
+	parser.add_argument('-o', '--output', default='/output')
+	args = parser.parse_args()
 
-    main(args.input, args.output)
+	main(args.input, args.output)
 

@@ -13,18 +13,23 @@ class CheckForBucketOperator(BaseOperator):
 		*args, 
 		**kwargs
 	):
-	    """
-	    Parameters
-	    ----------
-	    bucket_name : str
-	        The bucket name to check for availability
-	    """
+		"""
+		Parameters
+		----------
+		bucket_name : str
+			The bucket name to check for availability
+		"""
 		super(CheckForBucketOperator, self).__init__(*args, **kwargs)
 		self.bucket_name = bucket_name
 
-	def execute(self):
+	def execute(self, context):
 		"""
 		Check whether the S3 bucket is available as well as its log bucket
+
+		Parameters
+		----------
+		context : dict
+			The Airflow context
 		"""
 		s3 = S3Hook()
 

@@ -99,8 +99,6 @@ for (script_file, record_name) in record_scripts:
         }
     })
 
-
-spark_steps = []
 spark_steps.append({
     "Name": "Run data tests",
     "ActionOnFailure": "CANCEL_AND_WAIT",

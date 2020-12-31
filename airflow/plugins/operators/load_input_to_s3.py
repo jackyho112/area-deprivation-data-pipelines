@@ -16,23 +16,28 @@ class LoadInputToS3Operator(BaseOperator):
 		**kwargs
 	):
 		"""
-	    Parameters
-	    ----------
-	    dataset_id : str
-	        The dataset id
-	    bucket_name : str
-	        The bucket name for deposit
-	    region_name : str
-	        The dataset region
-	    """
+		Parameters
+		----------
+		dataset_id : str
+			The dataset id
+		bucket_name : str
+			The bucket name for deposit
+		region_name : str
+			The dataset region
+		"""
 		super(LoadInputToS3Operator, self).__init__(*args, **kwargs)
 		self.dataset_id = dataset_id
 		self.bucket_name = bucket_name
 		self.region_name = region_name
 
-	def execute(self):
+	def execute(self, context):
 		"""
 		Export assets from the latest revision of a AWS Data Exchange dataset to a bucket
+
+		Parameters
+		----------
+		context : dict
+			The Airflow context
 		"""
 		ds_client = AwsHook().get_client_type('dataexchange', region_name=self.region_name)
 		api = EntitledAssets(data_exchange_client=ds_client)

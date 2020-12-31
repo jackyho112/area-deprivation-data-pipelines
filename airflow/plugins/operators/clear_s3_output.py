@@ -12,18 +12,23 @@ class ClearS3OutputOperator(BaseOperator):
 		*args, 
 		**kwargs
 	):
-	    """
-	    Parameters
-	    ----------
-	    bucket_name : str
-	        The bucket name to delete the output folder in
-	    """
+		"""
+		Parameters
+		----------
+		bucket_name : str
+			The bucket name to delete the output folder in
+		"""
 		super(ClearS3OutputOperator, self).__init__(*args, **kwargs)
 		self.bucket_name = bucket_name
 
-	def execute(self):
+	def execute(self, context):
 		"""
 		Delete the output folder in a bucket
+
+		Parameters
+		----------
+		context : dict
+			The Airflow context
 		"""
 		s3 = S3Hook()
 

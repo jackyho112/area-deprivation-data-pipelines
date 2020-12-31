@@ -12,18 +12,18 @@ def create_spark_session():
 	return spark
 
 def create_temp_view(spark, name, input_dir):
-    """
-    Create a Spark temporary view for a dataset
-    
-    Parameters
-    ----------
-    spark : Spark session
-    	Current Spark session
-    name : str
-    	Name of the dataset
-    input_dir : str
-    	Input directory
-    """
+	"""
+	Create a Spark temporary view for a dataset
+	
+	Parameters
+	----------
+	spark : Spark session
+		Current Spark session
+	name : str
+		Name of the dataset
+	input_dir : str
+		Input directory
+	"""
 	df = spark.read \
 		.option("header", True) \
 		.option("escape", '"') \
@@ -33,18 +33,18 @@ def create_temp_view(spark, name, input_dir):
 	df.createOrReplaceTempView(name)
 
 def process_cargo_data(spark, input_dir, output):
-    """
-    Process cargo data by running a query to select fields
-    
-    Parameters
-    ----------
-    spark : Spark session
-    	Current Spark session
-    input_dir : str
-    	Input directory
-    output : str
-    	Output directory
-    """
+	"""
+	Process cargo data by running a query to select fields
+	
+	Parameters
+	----------
+	spark : Spark session
+		Current Spark session
+	input_dir : str
+		Input directory
+	output : str
+		Output directory
+	"""
 	for name in dataset_names:
 		create_temp_view(spark, name, input_dir)
 
@@ -87,16 +87,16 @@ def process_cargo_data(spark, input_dir, output):
 		.save(f"{output}/cargo/")
 
 def main(input_dir, output):
-    """
-    Process cargo data
-    
-    Parameters
-    ----------
-    input_dir : str
-    	Input directory
-    output : str
-    	Output directory
-    """
+	"""
+	Process cargo data
+	
+	Parameters
+	----------
+	input_dir : str
+		Input directory
+	output : str
+		Output directory
+	"""
 	spark = create_spark_session()
 	process_cargo_data(spark, input_dir, output)
 

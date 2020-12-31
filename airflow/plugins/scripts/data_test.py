@@ -17,44 +17,44 @@ def create_spark_session():
 	return spark
 
 def check_for_empty_data(df, name):
-    """
-    Check whether a dataframe is empty
-    
-    Parameters
-    ----------
-    df : Spark dataframe
-        The dataframe to check
-    name : str
-        The dataframe name
+	"""
+	Check whether a dataframe is empty
+	
+	Parameters
+	----------
+	df : Spark dataframe
+		The dataframe to check
+	name : str
+		The dataframe name
 
-    Returns
-    -------
-    list (str)
-        Error messages
-    """
+	Returns
+	-------
+	list (str)
+		Error messages
+	"""
 	if df.count() > 0:
 		return []
 	else:
 		return [f"The {name} dataframe is empty."]
 
 def check_col_fullness(df, name, cols):
-    """
-    Check whether certain dataframe columns have any empty row
-    
-    Parameters
-    ----------
-    df : Spark dataframe
-        The dataframe to check
-    name : str
-        The dataframe name
-    cols : list (str)
-        The columns to check for
+	"""
+	Check whether certain dataframe columns have any empty row
+	
+	Parameters
+	----------
+	df : Spark dataframe
+		The dataframe to check
+	name : str
+		The dataframe name
+	cols : list (str)
+		The columns to check for
 
-    Returns
-    -------
-    list (str)
-        Error messages
-    """
+	Returns
+	-------
+	list (str)
+		Error messages
+	"""
 	col_selects = list(map(
 		lambda x: count(when(isnull(col(x)), col(x))).alias(x),
 		cols
@@ -70,21 +70,21 @@ def check_col_fullness(df, name, cols):
 	return messages
 
 def get_dataframe(spark, name):
-    """
-    Get a dataframe in the output folder
-    
-    Parameters
-    ----------
-    spark : Spark session
-        Current Spark session
-    name : str
-        The data name
+	"""
+	Get a dataframe in the output folder
+	
+	Parameters
+	----------
+	spark : Spark session
+		Current Spark session
+	name : str
+		The data name
 
-    Returns
-    -------
-    Spark dataframe 
-        The Spark dataframe
-    """
+	Returns
+	-------
+	Spark dataframe 
+		The Spark dataframe
+	"""
 	return spark.read \
 		.option("header", True) \
 		.option("escape", '"') \
@@ -92,15 +92,15 @@ def get_dataframe(spark, name):
 		.csv(f"/output/{name}/*.csv")
 
 def check_data(spark):
-    """
-    Check data integrety of several datasets in the output folder. 
-    Raise an Exception if there is any error.
-    
-    Parameters
-    ----------
-    spark : Spark session
-        Current Spark session
-    """
+	"""
+	Check data integrety of several datasets in the output folder. 
+	Raise an Exception if there is any error.
+	
+	Parameters
+	----------
+	spark : Spark session
+		Current Spark session
+	"""
 	messages = []
 
 	datasets = list(map(
