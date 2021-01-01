@@ -12,13 +12,42 @@ For information on these datasets and their columns, refer to this [notebook](ht
 
 This data pipeline outputs four datasets in CSV files aggregating each year of import data. Here are the table schemas (from Spark) and how they are assembled.
 
-Fact Table: 
+Fact: 
 
-Bill table -
+Header table -
 
 From joining the header and bill dataset
 
 ![bill table schema](imgs/bill-table-schema.png)
+
+Refer to the [notebook](https://github.com/jackyho112/us-import-data-pipelines/blob/main/notebooks/bill_spark_op.ipynb) and [script](https://github.com/jackyho112/us-import-data-pipelines/blob/main/airflow/plugins/scripts/assemble_header.py) for more details
+
+Dimension:
+
+Cargo table - 
+
+From joining the cargo description, hazmat, and hazmat class datasets. Each row in each dataset describes a cargo in a shipment.
+
+![cargo table schema](imgs/cargo-table-schema.png)
+
+Refer to the [notebook](https://github.com/jackyho112/us-import-data-pipelines/blob/main/notebooks/cargo_spark_op.ipynb) and [script](https://github.com/jackyho112/us-import-data-pipelines/blob/main/airflow/plugins/scripts/assemble_cargo.py) for more details
+
+Contact table - 
+
+From joining the cosignee, notified party, and shipper datasets which are all contact parties for a shipment
+
+![contact table schema](imgs/contact-table-schema.png)
+
+Refer to the [notebook](https://github.com/jackyho112/us-import-data-pipelines/blob/main/notebooks/contact_spark_op.ipynb) and [script](https://github.com/jackyho112/us-import-data-pipelines/blob/main/airflow/plugins/scripts/assemble_contact.py) for more details
+
+Container table - 
+
+From joining the container and mark datasets.
+
+![container table schema](imgs/container-table-schema.png)
+
+Refer to the [notebook](https://github.com/jackyho112/us-import-data-pipelines/blob/main/notebooks/container_spark_op.ipynb) and [script](https://github.com/jackyho112/us-import-data-pipelines/blob/main/airflow/plugins/scripts/assemble_container.py) for more details
+
 
 ## Running Airflow
 
