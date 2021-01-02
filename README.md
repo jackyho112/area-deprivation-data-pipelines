@@ -95,9 +95,11 @@ For more information on Airflow, go to its [site](http://airflow.apache.org/docs
 The goal is to aggregate the import data so that it is easier for further analysis or exporting to data warehouses. I chose the models beceuse they simplify the original datasets and are suitable for further analysis or data modelling.
 
 2. The reasoning behind the choice of technologies 
+
 Airflow is suitable for orahcasting a ETL workflow, especially one for a data lake. Spark is suitable for handling big data, and these datasets all have millions of rows. AWS services integrate well with Amazon Data Exchange where the original data resides. EMR is a powerful and managed tool for running Spark jobs.
 
 3. How often should the data be updated?
+
 You can retrieve all the previous years' data right now and there is no more update. Once 2021 data comes in, conventionally, they are updated once a week.
 
 4. If the data was increased by 100 times, the output cannot be stored in one partition and should therefore have several partitions. Although Spark should be able to handle the data, you might want to add more nodes to speed up the processing if it becomes too slow.
