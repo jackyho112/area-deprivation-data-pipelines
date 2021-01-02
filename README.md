@@ -57,7 +57,7 @@ Refer to the [notebook](https://github.com/jackyho112/us-import-data-pipelines/b
 Summary:
 
 1. Check that the specified buckets (one for data storage, and one for logs) are available
-2. Load data and scripts to the bucket
+2. Load data using the Data Exchange API and scripts to the bucket
 3. Create an [EMR](https://aws.amazon.com/emr/) cluster and load necessary jobs to the cluster
 4. Termiante the cluster when everything is done
 
