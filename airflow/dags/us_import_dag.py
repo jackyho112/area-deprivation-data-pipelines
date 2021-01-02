@@ -6,11 +6,32 @@ from airflow.operators import (
 	LoadInputToS3Operator, LoadScriptsToS3Operator, ClearS3OutputOperator,
 	CheckForBucketOperator
 )
+from airflow.operators.python_operator import PythonOperator
 from airflow.contrib.operators.emr_create_job_flow_operator import EmrCreateJobFlowOperator
 from airflow.contrib.operators.emr_terminate_job_flow_operator import EmrTerminateJobFlowOperator
 from airflow.contrib.operators.emr_add_steps_operator import EmrAddStepsOperator
 from airflow.contrib.sensors.emr_step_sensor import EmrStepSensor
 from airflow.contrib.operators.emr_terminate_job_flow_operator import EmrTerminateJobFlowOperator
+
+import pandas as pd
+import ssl
+from io import StringIO
+import boto3
+ssl._create_default_https_context = ssl._create_unverified_context
+
+def download_hts_data(excel_input, s3_bucket):
+	hts = pd.read_excel(excel_input)
+	cols = hts.columns
+	cols = list(map(
+	    lambda x: '_'.join(x.lower().split()),
+	    cols
+	))
+
+	hts.columns = cols
+	csv_buffer = StringIO()
+	hts.to_csv(csv_buffer)
+	s3_resource = boto3.resource('s3')
+	s3_resource.Object(s3_bucket, 'input/hts.csv').put(Body=csv_buffer.getvalue())
 
 default_args = {
 	'owner': 'jackyho',
@@ -152,6 +173,14 @@ load_input_to_s3_bucket_operator = LoadInputToS3Operator(
 	dag=dag
 )
 
+load_hts_input_to_s3_bucket_operator = PythonOperator(
+	task_id='load_hts_input_to_s3_bucket',
+   	provide_context=False,
+   	python_callable=download_hts_data,
+   	op_args=[Variable.get('hts_excel_link'), Variable.get('s3_raw_data_bucket')],
+	dag=dag
+)
+
 load_scripts_to_s3_bucket_operator = LoadScriptsToS3Operator(
 	task_id='load_scripts_to_s3_bucket',
 	bucket_name=Variable.get('s3_raw_data_bucket'),
@@ -205,12 +234,14 @@ terminate_emr_cluster = EmrTerminateJobFlowOperator(
 
 start_operator >> s3_bucket_sensor
 s3_bucket_sensor >> [
-	load_input_to_s3_bucket_operator, 
+	load_hts_input_to_s3_bucket_operator,
+	load_input_to_s3_bucket_operator,
 	load_scripts_to_s3_bucket_operator,
 	clear_s3_output_operator,
 	create_emr_cluster
 ]
 [
+	load_hts_input_to_s3_bucket_operator,
 	load_input_to_s3_bucket_operator, 
 	load_scripts_to_s3_bucket_operator,
 	clear_s3_output_operator,

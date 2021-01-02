@@ -1,5 +1,6 @@
 {
     "s3_raw_data_bucket": "jacky-data-engineering-us-export", 
     "data_exchange_dataset_id": "d0e9bd6148e8f14889980954017b0927",
-    "data_exchange_dataset_region": "us-east-1"
+    "data_exchange_dataset_region": "us-east-1",
+    "hts_excel_link": "https://www.usitc.gov/sites/default/files/tata/hts/hts_2020_revision_28_xls.xls"
 }

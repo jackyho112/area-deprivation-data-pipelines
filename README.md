@@ -26,7 +26,7 @@ Refer to the [notebook](https://github.com/jackyho112/us-import-data-pipelines/b
 
 **Cargo table -** 
 
-From joining the cargo description, hazmat, and hazmat class datasets. Each row in each dataset describes a cargo in a shipment.
+From joining the cargo description, hazmat, hazmat class, and tariff datasets. Each row in each dataset describes a cargo in a shipment.
 
 ![cargo table schema](imgs/cargo-table-schema.png)
 
