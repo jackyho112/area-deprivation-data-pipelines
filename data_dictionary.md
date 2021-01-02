@@ -43,7 +43,7 @@
 
 ## Cargo
 
-**From the cargo description dataset** \ 
+**From the cargo description dataset**\
  |-- identifier: long (nullable = true) \
  |-- container_number: string (nullable = true) \
  |-- sequence_number: integer (nullable = true) \
