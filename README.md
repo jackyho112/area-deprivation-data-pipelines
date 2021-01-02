@@ -87,3 +87,21 @@ airflow webserver -p 8080
 ```
 
 For more information on Airflow, go to its [site](http://airflow.apache.org/docs/stable/)
+
+## Project write-up
+
+1. What is the goal? Why did I choose the data model?
+
+The goal is to aggregate the import data so that it is easier for further analysis or exporting to data warehouses. I chose the models beceuse they simplify the original datasets and are suitable for further analysis or data modelling.
+
+2. The reasoning behind the choice of technologies 
+Airflow is suitable for orahcasting a ETL workflow, especially one for a data lake. Spark is suitable for handling big data, and these datasets all have millions of rows. AWS services integrate well with Amazon Data Exchange where the original data resides. EMR is a powerful and managed tool for running Spark jobs.
+
+3. How often should the data be updated?
+You can retrieve all the previous years' data right now and there is no more update. Once 2021 data comes in, conventionally, they are updated once a week.
+
+4. If the data was increased by 100 times, the output cannot be stored in one partition and should therefore have several partitions. Although Spark should be able to handle the data, you might want to add more nodes to speed up the processing if it becomes too slow.
+
+5. If the pipeline were run on a daily basis on 7am, Airflow could be set up to do that, but the data won't get updated every day.
+
+6. If the datasets needed to be accessed by 100+ people, a S3 bucket should be able to handle that. If the output data was to be copied over to tables on a cloud warehouse, it would depend on the warehouse specifications. Both Redshift and BigQuery should be able to handle that, but costs could be a concern.
