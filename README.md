@@ -12,9 +12,9 @@ For information on these datasets and their columns, refer to this [notebook](ht
 
 This data pipeline outputs four datasets in CSV files aggregating each year of import data. Here are the table schemas (from Spark) and how they are assembled.
 
-Fact: 
+# Fact:
 
-Header table -
+**Header table -**
 
 From joining the header and bill dataset
 
@@ -22,9 +22,9 @@ From joining the header and bill dataset
 
 Refer to the [notebook](https://github.com/jackyho112/us-import-data-pipelines/blob/main/notebooks/bill_spark_op.ipynb) and [script](https://github.com/jackyho112/us-import-data-pipelines/blob/main/airflow/plugins/scripts/assemble_header.py) for more details
 
-Dimension:
+# Dimension:
 
-Cargo table - 
+**Cargo table -** 
 
 From joining the cargo description, hazmat, and hazmat class datasets. Each row in each dataset describes a cargo in a shipment.
 
@@ -32,7 +32,7 @@ From joining the cargo description, hazmat, and hazmat class datasets. Each row 
 
 Refer to the [notebook](https://github.com/jackyho112/us-import-data-pipelines/blob/main/notebooks/cargo_spark_op.ipynb) and [script](https://github.com/jackyho112/us-import-data-pipelines/blob/main/airflow/plugins/scripts/assemble_cargo.py) for more details
 
-Contact table - 
+**Contact table -** 
 
 From joining the cosignee, notified party, and shipper datasets which are all contact parties for a shipment
 
@@ -40,7 +40,7 @@ From joining the cosignee, notified party, and shipper datasets which are all co
 
 Refer to the [notebook](https://github.com/jackyho112/us-import-data-pipelines/blob/main/notebooks/contact_spark_op.ipynb) and [script](https://github.com/jackyho112/us-import-data-pipelines/blob/main/airflow/plugins/scripts/assemble_contact.py) for more details
 
-Container table - 
+**Container table -** 
 
 From joining the container and mark datasets.
 
@@ -48,6 +48,20 @@ From joining the container and mark datasets.
 
 Refer to the [notebook](https://github.com/jackyho112/us-import-data-pipelines/blob/main/notebooks/container_spark_op.ipynb) and [script](https://github.com/jackyho112/us-import-data-pipelines/blob/main/airflow/plugins/scripts/assemble_container.py) for more details
 
+## Pipeline: 
+
+# US import ETL
+
+![dag](imgs/dag.png)
+
+Summary:
+
+1. Check that the specified buckets (one for data storage, and one for logs) are available
+2. Load data and scripts to the bucket
+3. Create an [EMR](https://aws.amazon.com/emr/) cluster and load necessary jobs to the cluster
+4. Termiante the cluster when everything is done
+
+Details at the [dag file](https://github.com/jackyho112/us-import-data-pipelines/blob/main/airflow/dags/us_import_dag.py)
 
 ## Running Airflow
 
