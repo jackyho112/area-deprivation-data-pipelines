@@ -1,4 +1,4 @@
-# Data Dictationary
+# Data Dictionary
 
 - Based on Spark types
 - Descriptions of fields are omitted because they are not provided with the original datasets
