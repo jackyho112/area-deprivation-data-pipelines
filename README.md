@@ -12,7 +12,7 @@ For information on these datasets and their columns, refer to this [notebook](ht
 
 This data pipeline outputs four datasets in CSV files aggregating each year of import data. Here are the table schemas (from Spark) and how they are assembled.
 
-# Fact:
+### Fact:
 
 **Header table -**
 
@@ -22,7 +22,7 @@ From joining the header and bill dataset
 
 Refer to the [notebook](https://github.com/jackyho112/us-import-data-pipelines/blob/main/notebooks/bill_spark_op.ipynb) and [script](https://github.com/jackyho112/us-import-data-pipelines/blob/main/airflow/plugins/scripts/assemble_header.py) for more details
 
-# Dimension:
+### Dimension:
 
 **Cargo table -** 
 
@@ -50,7 +50,7 @@ Refer to the [notebook](https://github.com/jackyho112/us-import-data-pipelines/b
 
 ## Pipeline: 
 
-# US import ETL
+### US import ETL
 
 ![dag](imgs/dag.png)
 
