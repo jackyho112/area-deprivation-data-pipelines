@@ -1,10 +1,10 @@
 # US import data pipeline
 
-The source is [Amazon Data Exchange](https://aws.amazon.com/marketplace/pp/US-Imports-Automated-Manifest-System-AMS-Shipments/prodview-stk4wn3mbhx24). It contains data for US imports from 2018 to 2020. I assume it will also contain 2021 data when it becomes available. 
+The source is [Amazon Data Exchange](https://aws.amazon.com/marketplace/pp/US-Imports-Automated-Manifest-System-AMS-Shipments/prodview-stk4wn3mbhx24) and [US Harmonized Tariff Schedule (HTS)](https://www.usitc.gov/tata/hts/archive/index.htm). It contains data for US imports from 2018 to 2020. I assume it will also contain 2021 data when it becomes available. 
 
 ## Input data
 
-Each year's data contains 11 datasets for header, bill, cargo description, hazmat, hazmat class, tariff, cosignee, notified party, shipper, container, and mark number.
+Each year's data contains 11 datasets for header, bill, cargo description, hazmat, hazmat class, tariff, cosignee, notified party, shipper, container, and mark number. We will also use the latest HTS data.
 
 For information on these datasets and their columns, refer to this [notebook](https://github.com/jackyho112/us-import-data-pipelines/blob/main/notebooks/exploration.ipynb). You can also refer to the Amazon Data Exchange [overview page](https://aws.amazon.com/marketplace/pp/US-Imports-Automated-Manifest-System-AMS-Shipments/prodview-stk4wn3mbhx24#offers).
 
@@ -26,7 +26,7 @@ Refer to the [notebook](https://github.com/jackyho112/us-import-data-pipelines/b
 
 **Cargo table -** 
 
-From joining the cargo description, hazmat, hazmat class, and tariff datasets. Each row in each dataset describes a cargo in a shipment.
+From joining the cargo description, hazmat, hazmat class, tariff, and HTS datasets. Each row in each dataset describes a cargo in a shipment.
 
 ![cargo table schema](imgs/cargo-table-schema.png)
 
@@ -66,7 +66,7 @@ Details at the [dag file](https://github.com/jackyho112/us-import-data-pipelines
 ## What you need to run the pipeline
 
 - [Set up](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html) AWS credentials on your local machine or where you will host the Airflow application
-- Fill in the variable JSON [file](https://github.com/jackyho112/us-import-data-pipelines/blob/main/airflow/variables.json)
+- Fill in the variable JSON [file](https://github.com/jackyho112/us-import-data-pipelines/blob/main/airflow/variables.json) (The latest HTS excel link can be found from the [source](https://www.usitc.gov/tata/hts/archive/index.htm))
 - Create the storage and log buckets (if your storage bucket name is "us-import", you also need a "us-import-logs" bucket to store EMR logs)
 - Run Airflow and load the JSON file
 
