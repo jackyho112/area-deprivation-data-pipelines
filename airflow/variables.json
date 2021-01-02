@@ -1,8 +1,5 @@
 {
-    // The bucket to store the input, output, and scripts. You also needs to create [the storage bucket name]-logs bucket for storing EMR logs.
     "s3_raw_data_bucket": "jacky-data-engineering-us-export", 
-
-    // The dataset ID and region. Right now, it is set to the 2020 data. Feel free to change.
     "data_exchange_dataset_id": "d0e9bd6148e8f14889980954017b0927",
     "data_exchange_dataset_region": "us-east-1"
 }

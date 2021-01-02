@@ -67,7 +67,7 @@ Details at the [dag file](https://github.com/jackyho112/us-import-data-pipelines
 
 - [Set up](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html) AWS credentials on your local machine or where you will host the Airflow application
 - Fill in the variable JSON [file](https://github.com/jackyho112/us-import-data-pipelines/blob/main/airflow/variables.json)
-- Create the storage and log bucket
+- Create the storage and log buckets (if your storage bucket name is "us-import", you also need a "us-import-logs" bucket to store EMR logs)
 - Run Airflow and load the JSON file
 
 After the setup, feel free to tweak your Airflow settings and the DAGs.
