@@ -7,7 +7,7 @@
 
 ## Header
 
-*From the header dataset* \
+**From the header dataset** \
  |-- identifier: long (nullable = true) \
  |-- carrier_code: string (nullable = true) \
  |-- vessel_country_code: string (nullable = true) \
@@ -29,7 +29,7 @@
  |-- conveyance_id: string (nullable = true) \
  |-- mode_of_transportation: string (nullable = true) \
  |-- actual_arrival_date: timestamp (nullable = true) \
-*From the bill dataset* \
+**From the bill dataset** \
  |-- master_bol_number: string (nullable = true) \
  |-- house_bol_number: string (nullable = true) \
  |-- sub_house_bol_number: string (nullable = true) \
@@ -43,13 +43,13 @@
 
 ## Cargo
 
-*From the cargo description dataset* \ 
+**From the cargo description dataset** \ 
  |-- identifier: long (nullable = true) \
  |-- container_number: string (nullable = true) \
  |-- sequence_number: integer (nullable = true) \
  |-- piece_count: integer (nullable = true) \
  |-- description: string (nullable = true) \
-*From the hazmat and hazmat class datasets* \
+**From the hazmat and hazmat class datasets** \
  |-- hazmat_code: string (nullable = true) \
  |-- hazmat_class: string (nullable = true) \
  |-- hazmat_code_qualifier: string (nullable = true) \
@@ -63,7 +63,7 @@
  |-- harmonized_value: double (nullable = true) \
  |-- harmonized_weight: integer (nullable = true) \
  |-- harmonized_weight_unit: string (nullable = true) \
-*From the tariff harmonized number dataset* \
+**From the tariff harmonized number dataset** \
  |-- harmonized_tariff_schedule_desc: string (nullable = true) \
  |-- general_rate_of_duty: string (nullable = true) \
  |-- special_rate_of_duty: string (nullable = true) \
@@ -73,7 +73,7 @@
 
 ## Contact
 
-*From the cosignee, notified party, and shipper datasets* \
+**From the cosignee, notified party, and shipper datasets** \
  |-- identifier: string (nullable = true) \
  |-- name: string (nullable = true) \
  |-- address_1: string (nullable = true \
@@ -91,7 +91,7 @@
 
 ## Container 
 
-*From the container dataset* \
+**From the container dataset** \
  |-- identifier: long (nullable = true) \
  |-- container_number: string (nullable = true) \
  |-- equipment_description_code: string (nullable = true) \
@@ -101,7 +101,7 @@
  |-- container_type: string (nullable = true) \
  |-- load_status: string (nullable = true) \
  |-- type_of_service: string (nullable = true) \
-*From the mark dataset* \
+**From the mark dataset** \
  |-- marks_and_numbers_1: string (nullable = true) \
  |-- marks_and_numbers_2: string (nullable = true) \
  |-- marks_and_numbers_3: string (nullable = true) \
