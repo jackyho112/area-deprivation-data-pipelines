@@ -69,7 +69,7 @@
  |-- special_rate_of_duty: string (nullable = true) \
  |-- column_2_rate_of_duty: string (nullable = true) \
  |-- quota_quantity: string (nullable = true) \
- |-- additional_duties: string (nullable = true) \
+ |-- additional_duties: string (nullable = true)
 
 ## Contact
 
@@ -87,7 +87,7 @@
  |-- contact_name: string (nullable = true) \
  |-- comm_number_qualifier: string (nullable = true) \
  |-- comm_number: string (nullable = true) \
- |-- contact_type: string (nullable = false) \
+ |-- contact_type: string (nullable = false)
 
 ## Container 
 
